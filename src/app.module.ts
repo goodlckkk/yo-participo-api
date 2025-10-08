@@ -3,6 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { Sponsor } from './sponsors/entities/sponsor.entity';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -19,7 +21,7 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [], // Dejaremos esto vacío por ahora
+      entities: [Sponsor, User], // Dejaremos esto vacío por ahora
       synchronize: true, // En desarrollo, crea las tablas automáticamente. ¡No usar en producción!
       ssl: {
         rejectUnauthorized: false,
