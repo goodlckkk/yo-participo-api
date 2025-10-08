@@ -21,7 +21,9 @@ import { ConfigModule } from '@nestjs/config';
       database: process.env.DB_DATABASE,
       entities: [], // Dejaremos esto vacío por ahora
       synchronize: true, // En desarrollo, crea las tablas automáticamente. ¡No usar en producción!
-      
+      ssl: {
+        rejectUnauthorized: false,
+      },
     }),   
   ],
   controllers: [AppController],
