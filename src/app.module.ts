@@ -7,6 +7,7 @@ import { Sponsor } from './sponsors/entities/sponsor.entity';
 import { User } from './users/entities/user.entity';
 import { Trial } from './trials/entities/trial.entity';
 import { Participant } from './participants/entities/participant.entitiy'
+import { TrialsModule } from './trials/trials.module';
 
 @Module({
   imports: [
@@ -28,7 +29,9 @@ import { Participant } from './participants/entities/participant.entitiy'
       ssl: {
         rejectUnauthorized: false,
       },
-    }),   
+    }),
+
+    TrialsModule,   
   ],
   controllers: [AppController],
   providers: [AppService],
