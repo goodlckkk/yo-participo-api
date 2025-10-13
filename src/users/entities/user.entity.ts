@@ -18,7 +18,7 @@ import {
     id: string;
   
     @Column({ length: 255 })
-    full_name: string;
+    fullName: string;
   
     @Column({ unique: true, length: 255 })
     email: string;
