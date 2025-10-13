@@ -8,6 +8,7 @@ import { User } from './users/entities/user.entity';
 import { Trial } from './trials/entities/trial.entity';
 import { Participant } from './participants/entities/participant.entitiy'
 import { TrialsModule } from './trials/trials.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -31,7 +32,9 @@ import { TrialsModule } from './trials/trials.module';
       },
     }),
 
-    TrialsModule,   
+    TrialsModule,
+
+    UsersModule,   
   ],
   controllers: [AppController],
   providers: [AppService],
