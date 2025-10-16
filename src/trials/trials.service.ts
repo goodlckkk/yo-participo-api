@@ -23,7 +23,7 @@ export class TrialsService {
     return this.trialRepository.save(newTrial);
   }
 
-  async findAll(status?: TrialStatus) {
+  async findAll(status?: TrialStatus, page = 1, limit = 10) {
     const findOptions: FindManyOptions<Trial> = {
       relations: ['sponsor'],
     };
@@ -34,7 +34,25 @@ export class TrialsService {
       };
     }
 
-    return this.trialRepository.find(findOptions);
+    const pageNumber = page > 0 ? page : 1;
+    const limitNumber = limit > 0 ? limit : 10;
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const [data, totalItems] = await this.trialRepository.findAndCount({
+      ...findOptions,
+      take: limitNumber,
+      skip,
+    });
+
+    const totalPages = Math.ceil(totalItems / limitNumber) || 1;
+
+    return {
+      data,
+      totalItems,
+      totalPages,
+      currentPage: pageNumber,
+      limit: limitNumber,
+    };
   }
 
   async findOne(id: string) {
