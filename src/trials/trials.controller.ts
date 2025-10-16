@@ -4,6 +4,7 @@ import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { HttpStatus } from '@nestjs/common';
 import { TrialStatus } from './entities/trial.entity';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Controller('trials')
 export class TrialsController {
@@ -15,8 +16,9 @@ export class TrialsController {
   }
 
   @Get()
-  findAll(@Query('status') status?: TrialStatus) {
-    return this.trialsService.findAll(status);
+  findAll(@Query() query: PaginationDto & { status?: TrialStatus }) {
+    const { page, limit, status } = query;
+    return this.trialsService.findAll(status, page, limit);
   }
 
   @Get(':id')
