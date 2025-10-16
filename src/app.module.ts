@@ -6,10 +6,11 @@ import { ConfigModule } from '@nestjs/config';
 import { Sponsor } from './sponsors/entities/sponsor.entity';
 import { User } from './users/entities/user.entity';
 import { Trial } from './trials/entities/trial.entity';
-import { Participant } from './participants/entities/participant.entitiy'
+import { Participation } from './participations/entities/participation.entity';
 import { TrialsModule } from './trials/trials.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { ParticipationsModule } from './participations/participations.module';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Sponsor, User, Trial, Participant], // Dejaremos esto vacío por ahora
+      entities: [Sponsor, User, Trial, Participation], // Dejaremos esto vacío por ahora
       synchronize: true, // En desarrollo, crea las tablas automáticamente. ¡No usar en producción!
       ssl: {
         rejectUnauthorized: false,
@@ -37,7 +38,9 @@ import { AuthModule } from './auth/auth.module';
 
     UsersModule,
 
-    AuthModule,   
+    AuthModule,
+    
+    ParticipationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

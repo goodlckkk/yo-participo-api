@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query } from '@nestjs/common';
 import { TrialsService } from './trials.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { HttpStatus } from '@nestjs/common';
+import { TrialStatus } from './entities/trial.entity';
 
 @Controller('trials')
 export class TrialsController {
@@ -14,8 +15,8 @@ export class TrialsController {
   }
 
   @Get()
-  findAll() {
-    return this.trialsService.findAll();
+  findAll(@Query('status') status?: TrialStatus) {
+    return this.trialsService.findAll(status);
   }
 
   @Get(':id')

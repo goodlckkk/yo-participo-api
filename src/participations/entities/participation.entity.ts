@@ -9,24 +9,24 @@ import {
   import { User } from '../../users/entities/user.entity';
   import { Trial } from '../../trials/entities/trial.entity';
   
-  export enum ParticipantStatus {
+  export enum ParticipationStatus {
     CANDIDATE = 'CANDIDATE',
     CONTACTED = 'CONTACTED',
     PARTICIPATING = 'PARTICIPATING',
     REJECTED = 'REJECTED',
   }
   
-  @Entity('participants')
-  export class Participant {
+  @Entity('participations')
+  export class Participation {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   
     @Column({
       type: 'enum',
-      enum: ParticipantStatus,
-      default: ParticipantStatus.CANDIDATE,
+      enum: ParticipationStatus,
+      default: ParticipationStatus.CANDIDATE,
     })
-    status: ParticipantStatus;
+    status: ParticipationStatus;
   
     @CreateDateColumn({ name: 'assigned_at' })
     assignedAt: Date;
