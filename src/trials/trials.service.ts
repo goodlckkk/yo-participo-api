@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Trial } from './entities/trial.entity';
-import { Repository } from 'typeorm';
+import { Trial, TrialStatus } from './entities/trial.entity';
+import { FindManyOptions, Repository } from 'typeorm';
 
 @Injectable()
 export class TrialsService {
@@ -23,10 +23,18 @@ export class TrialsService {
     return this.trialRepository.save(newTrial);
   }
 
-  async findAll() {
-    return this.trialRepository.find({
+  async findAll(status?: TrialStatus) {
+    const findOptions: FindManyOptions<Trial> = {
       relations: ['sponsor'],
-    });
+    };
+
+    if (status) {
+      findOptions.where = {
+        status,
+      };
+    }
+
+    return this.trialRepository.find(findOptions);
   }
 
   async findOne(id: string) {
