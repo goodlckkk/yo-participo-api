@@ -7,6 +7,8 @@ import { Sponsor } from './sponsors/entities/sponsor.entity';
 import { User } from './users/entities/user.entity';
 import { Trial } from './trials/entities/trial.entity';
 import { Participation } from './participations/entities/participation.entity';
+import { PatientIntake } from './patient-intakes/entities/patient-intake.entity';
+import { PatientIntakesModule } from './patient-intakes/patient-intakes.module';
 import { TrialsModule } from './trials/trials.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
@@ -27,7 +29,7 @@ import { ParticipationsModule } from './participations/participations.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
-      entities: [Sponsor, User, Trial, Participation], // Dejaremos esto vacío por ahora
+      entities: [Sponsor, User, Trial, Participation, PatientIntake], // Dejaremos esto vacío por ahora
       synchronize: true, // En desarrollo, crea las tablas automáticamente. ¡No usar en producción!
       ssl: {
         rejectUnauthorized: false,
@@ -41,6 +43,7 @@ import { ParticipationsModule } from './participations/participations.module';
     AuthModule,
     
     ParticipationsModule,
+    PatientIntakesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
