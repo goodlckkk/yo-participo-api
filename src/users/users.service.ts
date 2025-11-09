@@ -1,5 +1,5 @@
 import { CreateUserDto } from './dto/create-user.dto';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,15 +13,25 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
   async create(createUserDto: CreateUserDto) {
+    try {
+      const { email, password, ...rest } = createUserDto;
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+      const normalizedEmail = email.trim().toLowerCase();
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = this.userRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
-    });
+      const newUser = this.userRepository.create({
+        ...rest,
+        email: normalizedEmail,
+        password: hashedPassword,
+      });
 
-    return this.userRepository.save(newUser);
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') {
+        throw new ConflictException('Ya existe un usuario con este correo electrónico.');
+      }
+      throw error;
+    }
   }
   async findAll() {
     return this.userRepository.find({
@@ -43,26 +53,48 @@ export class UsersService {
   }
 
   async findOneByEmail(email: string) {
-    // Correcto: Busca por email y no excluye la contraseña.
-    return this.userRepository.findOneBy({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('LOWER(user.email) = :email', { email: normalizedEmail })
+      .getOne();
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    if(updateUserDto.password){
-      delete updateUserDto.password;
+    const { birth_date, password, email, ...rest } = updateUserDto;
+
+    const data: Partial<User> = { ...rest };
+
+    if (email) {
+      data.email = email.trim().toLowerCase();
     }
 
-    const user = this.userRepository.preload({
+    if (birth_date) {
+      data.birth_date = new Date(birth_date);
+    }
+
+    if (password) {
+      data.password = await bcrypt.hash(password, 10);
+    }
+
+    const user = await this.userRepository.preload({
       id,
-      ...updateUserDto,
+      ...data,
     });
 
     if (!user) {
       throw new NotFoundException(`Usuario con ID "${id}" no encontrado.`);
     }
 
-    await this.userRepository.update(id, updateUserDto);
-    return this.findOne(id);
+    try {
+      return await this.userRepository.save(user);
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') {
+        throw new ConflictException('Ya existe un usuario con este correo electrónico.');
+      }
+      throw error;
+    }
   }
 
   async remove(id: string) {
