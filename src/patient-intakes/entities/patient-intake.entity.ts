@@ -46,7 +46,7 @@ export class PatientIntake {
   @Column({ length: 100 })
   comuna: string;
 
-  @Column({ length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   direccion: string | null;
 
   @Column({ length: 255 })
@@ -76,6 +76,9 @@ export class PatientIntake {
     default: PatientIntakeStatus.RECEIVED,
   })
   status: PatientIntakeStatus;
+
+  @Column({ type: 'uuid', nullable: true })
+  trialId: string | null;
 
   @ManyToOne(() => Trial, { nullable: true })
   trial: Trial | null;

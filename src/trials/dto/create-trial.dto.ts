@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsObject, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty, IsObject, IsUUID, IsOptional, IsEnum } from 'class-validator';
+import { TrialStatus } from '../entities/trial.entity';
 
 export class CreateTrialDto {
   @IsString()
@@ -17,6 +18,10 @@ export class CreateTrialDto {
   clinic_city: string;
 
   @IsUUID()
-  @IsNotEmpty()
-  sponsor_id: string; // Recibimos el ID del patrocinador
+  @IsOptional() // Sponsor es opcional
+  sponsor_id?: string; // Recibimos el ID del patrocinador (opcional)
+
+  @IsEnum(TrialStatus)
+  @IsOptional() // Status es opcional, por defecto será RECRUITING
+  status?: TrialStatus;
 }
