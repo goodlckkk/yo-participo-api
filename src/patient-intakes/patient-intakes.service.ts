@@ -40,4 +40,11 @@ export class PatientIntakesService {
 
     return intake;
   }
+
+  async findByTrial(trialId: string) {
+    return this.patientIntakeRepository.find({
+      where: { trialId },
+      order: { createdAt: 'DESC' },
+    });
+  }
 }

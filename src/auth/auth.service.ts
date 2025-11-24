@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { LoginDto } from './dto/login.dto';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -9,6 +10,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async login(loginDto: LoginDto) {
@@ -44,5 +46,28 @@ export class AuthService {
       expires_in: expiresInSeconds,
       expires_at: expiresAt,
     };
-  } 
+  }
+  
+  /**
+   * Convierte el formato de tiempo (ej: '15m', '1h', '7d') a milisegundos
+   */
+  private parseExpirationTime(time: string): number {
+    const units: { [key: string]: number } = {
+      s: 1000,
+      m: 60 * 1000,
+      h: 60 * 60 * 1000,
+      d: 24 * 60 * 60 * 1000,
+    };
+    
+    const match = time.match(/^(\d+)([smhd])$/);
+    if (!match) {
+      // Por defecto 15 minutos
+      return 15 * 60 * 1000;
+    }
+    
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+    
+    return value * (units[unit] || units.m);
+  }
 }

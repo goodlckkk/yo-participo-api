@@ -19,6 +19,12 @@ export class PatientIntakesController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('trial/:trialId')
+  findByTrial(@Param('trialId') trialId: string) {
+    return this.patientIntakesService.findByTrial(trialId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.patientIntakesService.findOne(id);

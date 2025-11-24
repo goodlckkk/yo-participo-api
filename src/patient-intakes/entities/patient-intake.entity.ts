@@ -77,6 +77,9 @@ export class PatientIntake {
   })
   status: PatientIntakeStatus;
 
+  @Column({ type: 'uuid', nullable: true })
+  trialId: string | null;
+
   @ManyToOne(() => Trial, { nullable: true })
   trial: Trial | null;
 

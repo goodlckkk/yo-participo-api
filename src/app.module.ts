@@ -1,18 +1,20 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { Sponsor } from './sponsors/entities/sponsor.entity';
 import { User } from './users/entities/user.entity';
 import { Trial } from './trials/entities/trial.entity';
-import { Participation } from './participations/entities/participation.entity';
 import { PatientIntake } from './patient-intakes/entities/patient-intake.entity';
 import { PatientIntakesModule } from './patient-intakes/patient-intakes.module';
 import { TrialsModule } from './trials/trials.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { ParticipationsModule } from './participations/participations.module';
+import { StatsModule } from './stats/stats.module';
+import { SponsorsModule } from './sponsors/sponsors.module';
 
 @Module({
   imports: [
@@ -21,31 +23,49 @@ import { ParticipationsModule } from './participations/participations.module';
       isGlobal: true, // Hace que las variables estén disponibles en toda la app
     }),
 
-    // 2. Módulo de TypeORM para la conexión a la base de datos
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT ?? '5432', 10),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_DATABASE,
-      entities: [Sponsor, User, Trial, Participation, PatientIntake], // Dejaremos esto vacío por ahora
-      synchronize: true, // En desarrollo, crea las tablas automáticamente. ¡No usar en producción!
-      ssl: {
-        rejectUnauthorized: false,
-      },
+    // 2. Rate Limiting - Protección contra fuerza bruta
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [{
+        ttl: parseInt(config.get('THROTTLE_TTL') || '60', 10) * 1000, // 60 segundos
+        limit: parseInt(config.get('THROTTLE_LIMIT') || '10', 10), // 10 requests
+      }],
+    }),
+
+    // 3. Módulo de TypeORM para la conexión a la base de datos
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): TypeOrmModuleOptions => ({
+        type: 'postgres',
+        host: config.get<string>('DB_HOST'),
+        port: parseInt(config.get<string>('DB_PORT') ?? '5432', 10),
+        username: config.get<string>('DB_USERNAME'),
+        password: config.get<string>('DB_PASSWORD'),
+        database: config.get<string>('DB_DATABASE'),
+        entities: [Sponsor, User, Trial, PatientIntake],
+        synchronize: config.get('NODE_ENV') !== 'production',
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      } as TypeOrmModuleOptions),
     }),
 
     TrialsModule,
-
     UsersModule,
-
     AuthModule,
-    
-    ParticipationsModule,
     PatientIntakesModule,
+    StatsModule,
+    SponsorsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard, // Rate limiting global
+    },
+  ],
 })
 export class AppModule {}

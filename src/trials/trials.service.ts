@@ -17,7 +17,8 @@ export class TrialsService {
 
     const newTrial = this.trialRepository.create({
       ...trialData,
-      sponsor: { id: sponsor_id },
+      // Solo asignar sponsor si se proporciona sponsor_id
+      ...(sponsor_id && { sponsor: { id: sponsor_id } }),
     });
 
     return this.trialRepository.save(newTrial);
@@ -84,6 +85,5 @@ export class TrialsService {
   async remove(id: string) {
     const trial = await this.findOne(id);
     await this.trialRepository.remove(trial);
-    //return trial;
   }
 }

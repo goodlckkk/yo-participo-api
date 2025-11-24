@@ -1,0 +1,47 @@
+version: 0.2
+
+# AWS CodeBuild buildspec para yo-participo-api
+# Este archivo define cómo AWS CodeBuild debe construir y desplegar la aplicación
+
+phases:
+  # Fase de instalación: instalar dependencias
+  install:
+    runtime-versions:
+      nodejs: 18
+    commands:
+      - echo "Instalando dependencias..."
+      - npm ci --only=production
+      - npm install -g @nestjs/cli
+
+  # Fase de pre-build: verificar configuración
+  pre_build:
+    commands:
+      - echo "Verificando versiones..."
+      - node --version
+      - npm --version
+      - echo "Pre-build completado"
+
+  # Fase de build: compilar la aplicación
+  build:
+    commands:
+      - echo "Compilando aplicación NestJS..."
+      - npm run build
+      - echo "Build completado exitosamente"
+
+  # Fase de post-build: preparar artefactos
+  post_build:
+    commands:
+      - echo "Preparando artefactos para despliegue..."
+      - echo "Build finalizado en $(date)"
+
+# Artefactos a guardar después del build
+artifacts:
+  files:
+    - '**/*'
+  base-directory: dist
+  name: yo-participo-api-$(date +%Y%m%d-%H%M%S)
+
+# Caché para acelerar builds futuros
+cache:
+  paths:
+    - 'node_modules/**/*'

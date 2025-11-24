@@ -1,0 +1,41 @@
+# Archivos y carpetas a ignorar en el despliegue de Elastic Beanstalk
+# Esto reduce el tamaño del bundle y acelera el despliegue
+
+# Código fuente (solo necesitamos el compilado en /dist)
+src/
+test/
+
+# Archivos de desarrollo
+*.spec.ts
+*.test.ts
+.env.development.local
+.env.test.local
+
+# Documentación
+*.md
+!README.md
+
+# Tests
+coverage/
+.nyc_output/
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Git
+.git/
+.gitignore
+
+# Logs
+logs/
+*.log
+
+# Temporal
+.temp/
+.tmp/
+temp_trials.txt
+
+# Node modules (se instalarán en AWS)
+# node_modules/  # Comentado porque AWS los necesita

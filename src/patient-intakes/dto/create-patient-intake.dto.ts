@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator';
 
 export class CreatePatientIntakeDto {
@@ -72,4 +73,8 @@ export class CreatePatientIntakeDto {
 
   @IsBoolean()
   aceptaPrivacidad: boolean;
+
+  @IsOptional()
+  @IsUUID()
+  trialId?: string;
 }
