@@ -6,8 +6,19 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Seguridad: Headers HTTP con Helmet
-  app.use(helmet());
+  app.setGlobalPrefix('api');
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
+
+  app.enableCors();
 
   // CORS: Permitir solo el frontend configurado
   app.enableCors({

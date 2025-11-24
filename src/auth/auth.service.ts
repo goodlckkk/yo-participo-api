@@ -17,27 +17,34 @@ export class AuthService {
 
     const user = await this.usersService.findOneByEmail(loginDto.email);
 
+    console.log('[Auth] Intento de login', {
+      email: loginDto.email,
+      usuarioEncontrado: Boolean(user),
+    });
+
     if (!user) {
       throw new UnauthorizedException('Credenciales incorrectas (usuario no encontrado).');
     }
 
     const passwordsMatch = await bcrypt.compare(loginDto.password, user.password);
 
+    console.log('[Auth] Resultado comparación contraseña', {
+      email: loginDto.email,
+      passwordsMatch,
+    });
+
     if (!passwordsMatch) {
       throw new UnauthorizedException('Credenciales incorrectas (contraseña no coincide).');
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    const access_token = this.jwtService.sign(payload);
-    
-    // Calcular la fecha de expiración
-    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '15m';
-    const expiresInMs = this.parseExpirationTime(expiresIn);
-    const expires_at = new Date(Date.now() + expiresInMs).toISOString();
+    const expiresInSeconds = 15 * 60;
+    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
 
     return {
-      access_token,
-      expires_at,
+      access_token: this.jwtService.sign(payload),
+      expires_in: expiresInSeconds,
+      expires_at: expiresAt,
     };
   }
   
