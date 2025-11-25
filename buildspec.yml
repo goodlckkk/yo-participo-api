@@ -10,8 +10,7 @@ phases:
       nodejs: 18
     commands:
       - echo "Instalando dependencias..."
-      - npm ci --only=production
-      - npm install -g @nestjs/cli
+      - npm ci
 
   # Fase de pre-build: verificar configuración
   pre_build:
@@ -32,14 +31,19 @@ phases:
   post_build:
     commands:
       - echo "Preparando artefactos para despliegue..."
+      - echo "Limpiando devDependencies..."
+      - npm prune --production
       - echo "Build finalizado en $(date)"
 
 # Artefactos a guardar después del build
 artifacts:
   files:
-    - '**/*'
-  base-directory: dist
-  name: yo-participo-api-$(date +%Y%m%d-%H%M%S)
+    - 'dist/**/*'
+    - 'node_modules/**/*'
+    - 'package.json'
+    - 'package-lock.json'
+    - 'Procfile'
+    - '.ebextensions/**/*'
 
 # Caché para acelerar builds futuros
 cache:
