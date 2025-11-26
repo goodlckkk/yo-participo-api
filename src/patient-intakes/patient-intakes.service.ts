@@ -47,4 +47,25 @@ export class PatientIntakesService {
       order: { createdAt: 'DESC' },
     });
   }
+
+  /**
+   * Actualiza un paciente (por ejemplo, asignar a un ensayo)
+   */
+  async update(id: string, updateData: Partial<PatientIntake>) {
+    const intake = await this.findOne(id);
+    
+    // Actualizar los campos proporcionados
+    Object.assign(intake, updateData);
+    
+    return this.patientIntakeRepository.save(intake);
+  }
+
+  /**
+   * Elimina un paciente del sistema
+   */
+  async remove(id: string) {
+    const intake = await this.findOne(id);
+    await this.patientIntakeRepository.remove(intake);
+    return { message: 'Paciente eliminado exitosamente' };
+  }
 }
