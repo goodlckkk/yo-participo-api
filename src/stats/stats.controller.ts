@@ -15,17 +15,23 @@ import { AuthGuard } from '@nestjs/passport';
 import { StatsService } from './stats.service';
 
 @Controller('stats')
-@UseGuards(AuthGuard('jwt'))
 export class StatsController {
   constructor(private readonly statsService: StatsService) {}
 
   @Get()
+  @UseGuards(AuthGuard('jwt'))
   async getStats() {
     return this.statsService.getGeneralStats();
   }
 
   @Get('trends')
+  @UseGuards(AuthGuard('jwt'))
   async getTrends() {
     return this.statsService.getPatientIntakeTrends();
+  }
+
+  @Get('public')
+  async getPublicStats() {
+    return this.statsService.getPublicStats();
   }
 }
