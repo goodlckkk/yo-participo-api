@@ -38,7 +38,13 @@ import {
   
     @Column({ length: 255 })
     clinic_city: string;
-  
+
+    @Column({ type: 'int', nullable: true, default: 30 })
+    max_participants: number;
+
+    @Column({ type: 'int', nullable: true, default: 0 })
+    current_participants: number;
+
     @ManyToOne(() => Sponsor, { nullable: false })
     @JoinColumn({ name: 'sponsor_id' })
     sponsor: Sponsor;
@@ -49,4 +55,3 @@ import {
     @UpdateDateColumn()
     updated_at: Date;
   }
-  

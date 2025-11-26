@@ -10,7 +10,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not, IsNull } from 'typeorm';
 import { Trial, TrialStatus } from '../trials/entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
 
@@ -115,5 +115,35 @@ export class StatsService {
       date: item.date,
       count: parseInt(item.count),
     }));
+  }
+
+  /**
+   * Obtiene estadísticas públicas para la página principal
+   * Sin requerir autenticación
+   */
+  async getPublicStats() {
+    // Total de pacientes incluidos en ensayos (con trialId asignado)
+    const patientsInTrials = await this.patientIntakeRepository.count({
+      where: { trialId: Not(IsNull()) },
+    });
+
+    // Ensayos en reclutamiento (RECRUITING)
+    const recruitingTrials = await this.trialRepository.count({
+      where: { status: TrialStatus.RECRUITING },
+    });
+
+    // Contar sponsors únicos de los ensayos activos (RECRUITING o ACTIVE)
+    const uniqueSponsors = await this.trialRepository
+      .createQueryBuilder('trial')
+      .select('COUNT(DISTINCT trial.sponsorId)', 'count')
+      .where('trial.status IN (:...statuses)', { statuses: [TrialStatus.RECRUITING, TrialStatus.ACTIVE] })
+      .andWhere('trial.sponsorId IS NOT NULL')
+      .getRawOne();
+
+    return {
+      patientsConnected: patientsInTrials,
+      activeTrials: recruitingTrials,
+      medicalCenters: parseInt(uniqueSponsors.count) || 0,
+    };
   }
 }
