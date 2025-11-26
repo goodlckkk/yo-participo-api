@@ -11,9 +11,24 @@ async function bootstrap() {
   // Seguridad con Helmet
   app.use(helmet());
 
-  // CORS: Permitir solo el frontend configurado
+  // CORS: Permitir múltiples orígenes (dominio principal y Amplify)
+  const allowedOrigins = [
+    'https://yoparticipo.cl',
+    'https://www.yoparticipo.cl',
+    'https://main.dcktii2mmd8u8.amplifyapp.com',
+    'http://localhost:4321',
+    'http://localhost:3000',
+  ];
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:4321',
+    origin: (origin, callback) => {
+      // Permitir peticiones sin origin (como Postman) o de orígenes permitidos
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
