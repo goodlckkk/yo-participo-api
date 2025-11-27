@@ -55,9 +55,6 @@ export class TrialsService {
           where: { trialId: trial.id },
         });
         
-        // Debug: verificar si hay pacientes
-        console.log(`Trial "${trial.title}" (${trial.id}): ${patientCount} pacientes`);
-        
         // Forzar serialización completa del objeto trial
         const trialPlain = JSON.parse(JSON.stringify(trial));
         
