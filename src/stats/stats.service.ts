@@ -135,9 +135,9 @@ export class StatsService {
     // Contar sponsors únicos de los ensayos activos (RECRUITING o ACTIVE)
     const uniqueSponsors = await this.trialRepository
       .createQueryBuilder('trial')
-      .select('COUNT(DISTINCT trial.sponsorId)', 'count')
+      .select('COUNT(DISTINCT trial.sponsor_id)', 'count')
       .where('trial.status IN (:...statuses)', { statuses: [TrialStatus.RECRUITING, TrialStatus.ACTIVE] })
-      .andWhere('trial.sponsorId IS NOT NULL')
+      .andWhere('trial.sponsor_id IS NOT NULL')
       .getRawOne();
 
     return {
