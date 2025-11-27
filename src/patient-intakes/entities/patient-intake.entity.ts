@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -81,6 +82,7 @@ export class PatientIntake {
   trialId: string | null;
 
   @ManyToOne(() => Trial, { nullable: true })
+  @JoinColumn({ name: 'trialId' })
   trial: Trial | null;
 
   @CreateDateColumn()

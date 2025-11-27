@@ -4,12 +4,15 @@ import { UpdateTrialDto } from './dto/update-trial.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Trial, TrialStatus } from './entities/trial.entity';
 import { FindManyOptions, Repository } from 'typeorm';
+import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
 
 @Injectable()
 export class TrialsService {
   constructor(
     @InjectRepository(Trial)
     private readonly trialRepository: Repository<Trial>,
+    @InjectRepository(PatientIntake)
+    private readonly patientIntakeRepository: Repository<PatientIntake>,
   ) {}
 
   async create(createTrialDto: CreateTrialDto) {
@@ -45,10 +48,30 @@ export class TrialsService {
       skip,
     });
 
+    // Contar pacientes inscritos para cada ensayo
+    const trialsWithPatientCount = await Promise.all(
+      data.map(async (trial) => {
+        const patientCount = await this.patientIntakeRepository.count({
+          where: { trialId: trial.id },
+        });
+        
+        // Debug: verificar si hay pacientes
+        console.log(`Trial "${trial.title}" (${trial.id}): ${patientCount} pacientes`);
+        
+        // Forzar serialización completa del objeto trial
+        const trialPlain = JSON.parse(JSON.stringify(trial));
+        
+        return {
+          ...trialPlain,
+          current_participants: patientCount,
+        };
+      })
+    );
+
     const totalPages = Math.ceil(totalItems / limitNumber) || 1;
 
     return {
-      data,
+      data: trialsWithPatientCount,
       totalItems,
       totalPages,
       currentPage: pageNumber,
@@ -66,7 +89,18 @@ export class TrialsService {
       throw new NotFoundException(`Ensayo clínico con ID "${id}" no encontrado.`);
     }
 
-    return trial;
+    // Contar pacientes inscritos en este ensayo
+    const patientCount = await this.patientIntakeRepository.count({
+      where: { trialId: trial.id },
+    });
+
+    // Forzar serialización completa del objeto trial
+    const trialPlain = JSON.parse(JSON.stringify(trial));
+
+    return {
+      ...trialPlain,
+      current_participants: patientCount,
+    };
   }
 
   async update(id: string, updateTrialDto: UpdateTrialDto) {
