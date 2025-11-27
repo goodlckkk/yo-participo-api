@@ -11,7 +11,7 @@ async function bootstrap() {
   // Seguridad con Helmet
   app.use(helmet());
 
-  // CORS: Permitir múltiples orígenes (dominio principal y Amplify)
+  // CORS: Permitir múltiples orígenes
   const allowedOrigins = [
     'https://yoparticipo.cl',
     'https://www.yoparticipo.cl',
@@ -22,10 +22,20 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Permitir peticiones sin origin (como Postman) o de orígenes permitidos
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Permitir peticiones sin origin (health checks, Postman, etc.)
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      // Normalizar origin (quitar barra final si existe)
+      const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+      
+      // Verificar si el origin está permitido
+      if (allowedOrigins.includes(normalizedOrigin)) {
         callback(null, true);
       } else {
+        console.warn(`[CORS] Origin bloqueado: ${origin}`);
         callback(new Error(`Origin ${origin} not allowed by CORS`));
       }
     },
