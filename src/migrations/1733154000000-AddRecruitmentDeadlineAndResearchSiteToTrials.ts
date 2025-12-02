@@ -10,7 +10,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
  * Fecha: 2025-12-02
  * Relacionado con: Feedback - Mejoras en estudios clínicos
  */
-export class AddRecruitmentDeadlineAndResearchSiteToTrials1733151000000
+export class AddRecruitmentDeadlineAndResearchSiteToTrials1733154000000
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -50,27 +50,14 @@ export class AddRecruitmentDeadlineAndResearchSiteToTrials1733151000000
     );
 
     // 4. Actualizar el enum de status para incluir los nuevos estados
-    // Primero, eliminar la restricción del enum existente
-    await queryRunner.query(`
-      ALTER TABLE trials 
-      ALTER COLUMN status TYPE varchar(50);
-    `);
-
-    // Actualizar valores existentes si es necesario
-    // ACTIVE -> FOLLOW_UP (para mantener consistencia)
-    await queryRunner.query(`
-      UPDATE trials 
-      SET status = 'FOLLOW_UP' 
-      WHERE status = 'ACTIVE';
-    `);
-
-    // Recrear el enum con los nuevos valores
-    await queryRunner.query(`
-      ALTER TABLE trials 
-      ALTER COLUMN status TYPE varchar(50);
-    `);
-
+    // Nota: La actualización de ACTIVE -> FOLLOW_UP se hace en migración anterior
+    
     // Agregar constraint para validar los valores permitidos
+    await queryRunner.query(`
+      ALTER TABLE trials 
+      DROP CONSTRAINT IF EXISTS trials_status_check;
+    `);
+    
     await queryRunner.query(`
       ALTER TABLE trials 
       ADD CONSTRAINT trials_status_check 
