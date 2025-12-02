@@ -6,7 +6,10 @@ import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.setGlobalPrefix('api');
+  // Configurar prefijo global 'api' pero excluir el endpoint raíz para health checks
+  app.setGlobalPrefix('api', {
+    exclude: ['/', 'health'],
+  });
 
   // Seguridad con Helmet
   app.use(helmet());
