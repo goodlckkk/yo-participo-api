@@ -10,7 +10,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
  * Fecha: 2025-12-02
  * Relacionado con: Feedback - Mejoras en patrocinadores
  */
-export class AddSponsorTypeToSponsors1733152000000
+export class AddSponsorTypeToSponsors1733155000000
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {

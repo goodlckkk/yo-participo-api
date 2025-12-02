@@ -11,7 +11,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
  * Fecha: 2025-12-02
  * Relacionado con: Requerimiento - Distinguir pacientes manuales vs web
  */
-export class AddSourceToPatientIntakes1733153000000
+export class AddSourceToPatientIntakes1733156000000
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
