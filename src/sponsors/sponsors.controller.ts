@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, ParseUUIDPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, ParseUUIDPipe, Query } from '@nestjs/common';
 import { SponsorsService } from './sponsors.service';
 import { CreateSponsorDto } from './dto/create-sponsor.dto';
 import { UpdateSponsorDto } from './dto/update-sponsor.dto';
@@ -10,6 +10,11 @@ export class SponsorsController {
   @Post()
   create(@Body() createSponsorDto: CreateSponsorDto) {
     return this.sponsorsService.create(createSponsorDto);
+  }
+
+  @Get('search')
+  search(@Query('q') query: string) {
+    return this.sponsorsService.search(query);
   }
 
   @Get()

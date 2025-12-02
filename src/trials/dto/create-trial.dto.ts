@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsObject, IsUUID, IsOptional, IsEnum, IsInt, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsObject, IsUUID, IsOptional, IsEnum, IsInt, Min, IsDateString, IsUrl, MaxLength } from 'class-validator';
 import { TrialStatus } from '../entities/trial.entity';
 
 export class CreateTrialDto {
@@ -34,4 +34,18 @@ export class CreateTrialDto {
   @IsEnum(TrialStatus)
   @IsOptional() // Status es opcional, por defecto será RECRUITING
   status?: TrialStatus;
+
+  @IsDateString()
+  @IsOptional() // Fecha límite de reclutamiento es opcional
+  recruitment_deadline?: string; // Formato ISO 8601 (YYYY-MM-DD)
+
+  @IsUrl()
+  @MaxLength(500)
+  @IsOptional() // URL del sitio de investigación es opcional
+  research_site_url?: string;
+
+  @IsString()
+  @MaxLength(255)
+  @IsOptional() // Nombre del sitio de investigación es opcional
+  research_site_name?: string;
 }
