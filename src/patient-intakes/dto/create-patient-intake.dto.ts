@@ -1,13 +1,16 @@
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsEmail,
+  IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
+import { PatientIntakeSource } from '../entities/patient-intake.entity';
 
 export class CreatePatientIntakeDto {
   @IsString()
@@ -26,7 +29,7 @@ export class CreatePatientIntakeDto {
   fechaNacimiento: string;
 
   @IsString()
-  @IsIn(['masculino', 'femenino', 'otro'])
+  @IsIn(['masculino', 'femenino'])
   sexo: string;
 
   @IsString()
@@ -68,6 +71,11 @@ export class CreatePatientIntakeDto {
   @IsString()
   cirugiasPrevias?: string;
 
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  patologias?: string[];
+
   @IsBoolean()
   aceptaTerminos: boolean;
 
@@ -77,4 +85,8 @@ export class CreatePatientIntakeDto {
   @IsOptional()
   @IsUUID()
   trialId?: string;
+
+  @IsEnum(PatientIntakeSource)
+  @IsOptional() // Source es opcional, por defecto será WEB
+  source?: PatientIntakeSource;
 }

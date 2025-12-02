@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsUrl, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUrl, MinLength, IsEnum } from 'class-validator';
+import { SponsorType } from '../entities/sponsor.entity';
 
 export class CreateSponsorDto {
   @IsString()
@@ -12,4 +13,8 @@ export class CreateSponsorDto {
   @IsUrl()
   @IsOptional()
   web_site?: string;
+
+  @IsEnum(SponsorType)
+  @IsOptional() // Tipo de sponsor es opcional, por defecto será SPONSOR
+  sponsor_type?: SponsorType;
 }

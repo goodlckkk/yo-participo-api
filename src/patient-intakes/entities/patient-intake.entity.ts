@@ -15,6 +15,18 @@ export enum PatientIntakeStatus {
   DISCARDED = 'DISCARDED',
 }
 
+/**
+ * Origen de la postulación del paciente:
+ * - WEB: Creado a través del formulario público web
+ * - MANUAL: Creado manualmente por un administrador en el dashboard
+ * - REFERRAL: Referido por un médico u otra fuente (futuro)
+ */
+export enum PatientIntakeSource {
+  WEB = 'WEB',
+  MANUAL = 'MANUAL',
+  REFERRAL = 'REFERRAL',
+}
+
 @Entity('patient_intakes')
 export class PatientIntake {
   @PrimaryGeneratedColumn('uuid')
@@ -65,6 +77,9 @@ export class PatientIntake {
   @Column({ type: 'text', nullable: true })
   cirugiasPrevias: string | null;
 
+  @Column({ type: 'jsonb', nullable: true })
+  patologias: string[];
+
   @Column({ default: false })
   aceptaTerminos: boolean;
 
@@ -77,6 +92,17 @@ export class PatientIntake {
     default: PatientIntakeStatus.RECEIVED,
   })
   status: PatientIntakeStatus;
+
+  /**
+   * Origen de la postulación: WEB (formulario público) o MANUAL (dashboard admin)
+   * Por defecto es WEB para mantener compatibilidad con registros existentes
+   */
+  @Column({
+    type: 'enum',
+    enum: PatientIntakeSource,
+    default: PatientIntakeSource.WEB,
+  })
+  source: PatientIntakeSource;
 
   @Column({ type: 'uuid', nullable: true })
   trialId: string | null;

@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TrialsService } from './trials.service';
+import { TrialMatchingService } from './trial-matching.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
 import { HttpStatus } from '@nestjs/common';
@@ -11,7 +12,10 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('trials')
 export class TrialsController {
-  constructor(private readonly trialsService: TrialsService) {}
+  constructor(
+    private readonly trialsService: TrialsService,
+    private readonly trialMatchingService: TrialMatchingService,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -25,6 +29,12 @@ export class TrialsController {
   findAll(@Query() query: PaginationDto & { status?: TrialStatus }) {
     const { page, limit, status } = query;
     return this.trialsService.findAll(status, page, limit);
+  }
+
+  @Get('suggestions/:patientId')
+  @UseGuards(AuthGuard('jwt'))
+  async getSuggestionsForPatient(@Param('patientId') patientId: string) {
+    return this.trialMatchingService.getSuggestionsForPatient(patientId);
   }
 
   @Get(':id')
