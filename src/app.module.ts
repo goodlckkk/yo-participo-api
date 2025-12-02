@@ -45,7 +45,7 @@ import { SponsorsModule } from './sponsors/sponsors.module';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
         entities: [Sponsor, User, Trial, PatientIntake],
-        synchronize: config.get('NODE_ENV') !== 'production',
+        synchronize: false, // SIEMPRE false - usamos migraciones
         ssl: {
           rejectUnauthorized: false,
         },
