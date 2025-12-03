@@ -8,6 +8,8 @@ import {
     JoinColumn,
   } from 'typeorm';
   import { Sponsor } from '../../sponsors/entities/sponsor.entity';
+  import { ResearchSite } from '../../research-sites/entities/research-site.entity';
+  import { InclusionCriteria } from '../interfaces/inclusion-criteria.interface';
   
   /**
    * Estados de un estudio clínico según feedback:
@@ -34,8 +36,12 @@ import {
     @Column({ type: 'text' })
     public_description: string;
   
+    /**
+     * Criterios de inclusión/exclusión del ensayo
+     * Ahora incluye soporte para códigos CIE-10 estandarizados
+     */
     @Column({ type: 'jsonb', nullable: true })
-    inclusion_criteria: object;
+    inclusion_criteria: InclusionCriteria | null;
   
     @Column({
       type: 'enum',
@@ -75,6 +81,14 @@ import {
     @ManyToOne(() => Sponsor, { nullable: false })
     @JoinColumn({ name: 'sponsor_id' })
     sponsor: Sponsor;
+
+    /**
+     * Relación con la institución/sitio de investigación
+     * Un ensayo pertenece a una institución
+     */
+    @ManyToOne(() => ResearchSite, (researchSite) => researchSite.trials, { nullable: true })
+    @JoinColumn({ name: 'research_site_id' })
+    researchSite: ResearchSite | null;
   
     @CreateDateColumn()
     created_at: Date;

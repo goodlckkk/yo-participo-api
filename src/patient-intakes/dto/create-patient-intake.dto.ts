@@ -29,12 +29,32 @@ export class CreatePatientIntakeDto {
   fechaNacimiento: string;
 
   @IsString()
-  @IsIn(['masculino', 'femenino'])
+  @IsIn(['Hombre', 'Mujer', 'masculino', 'femenino']) // Aceptar ambos formatos
   sexo: string;
 
+  /**
+   * Teléfono completo (legacy, mantener por compatibilidad)
+   * Ahora es opcional si se envían telefonoCodigoPais + telefonoNumero
+   */
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  telefono: string;
+  telefono?: string;
+
+  /**
+   * Código de país del teléfono
+   * Ejemplos: "+56", "+1", "+34"
+   */
+  @IsOptional()
+  @IsString()
+  telefonoCodigoPais?: string;
+
+  /**
+   * Número de teléfono sin código de país
+   * Ejemplo: "912345678"
+   */
+  @IsOptional()
+  @IsString()
+  telefonoNumero?: string;
 
   @IsEmail()
   email: string;
@@ -75,6 +95,15 @@ export class CreatePatientIntakeDto {
   @IsArray()
   @IsString({ each: true })
   patologias?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  codigos_cie10?: string[];
+
+  @IsOptional()
+  @IsString()
+  otrasEnfermedades?: string;
 
   @IsBoolean()
   aceptaTerminos: boolean;
