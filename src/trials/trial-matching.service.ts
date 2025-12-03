@@ -52,7 +52,7 @@ export class TrialMatchingService {
     // 2. Obtener solo ensayos en RECRUITING
     const recruitingTrials = await this.trialRepository.find({
       where: { status: TrialStatus.RECRUITING },
-      relations: ['sponsor'],
+      relations: ['sponsor', 'researchSite'],
     });
 
     // 3. Calcular score para cada ensayo

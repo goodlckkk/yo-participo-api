@@ -29,7 +29,7 @@ export class TrialsService {
 
   async findAll(status?: TrialStatus, page = 1, limit = 10) {
     const findOptions: FindManyOptions<Trial> = {
-      relations: ['sponsor'],
+      relations: ['sponsor', 'researchSite'],
     };
 
     if (status) {
@@ -79,7 +79,7 @@ export class TrialsService {
   async findOne(id: string) {
     const trial = await this.trialRepository.findOne({
       where: { id },
-      relations: ['sponsor'],
+      relations: ['sponsor', 'researchSite'],
     });
 
     if (!trial) {
