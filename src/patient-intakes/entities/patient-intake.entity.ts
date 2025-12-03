@@ -85,6 +85,20 @@ export class PatientIntake {
   @Column({ type: 'varchar', length: 255 })
   condicionPrincipal: string;
 
+  /**
+   * Código CIE-10 de la condición principal
+   * Ejemplo: "E11.9" para Diabetes mellitus tipo 2
+   */
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  condicionPrincipalCodigo: string | null;
+
+  /**
+   * Patologías prevalentes seleccionadas (checkboxes)
+   * Array de strings con las patologías comunes
+   */
+  @Column({ type: 'jsonb', nullable: true })
+  patologias: string[] | null;
+
   @Column({ type: 'text', nullable: true })
   descripcionCondicion: string | null;
 
