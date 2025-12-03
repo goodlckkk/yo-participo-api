@@ -16,10 +16,10 @@ export class AddSeparatePhoneFieldsToPatientIntake1733161000000
   implements MigrationInterface
 {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // 1. Agregar nuevas columnas
+    // 1. Agregar nuevas columnas (aumentar tamaño de telefonoCodigoPais para manejar casos edge)
     await queryRunner.query(`
       ALTER TABLE patient_intakes 
-      ADD COLUMN "telefonoCodigoPais" varchar(5) NULL;
+      ADD COLUMN "telefonoCodigoPais" varchar(10) NULL;
     `);
 
     await queryRunner.query(`
@@ -34,24 +34,36 @@ export class AddSeparatePhoneFieldsToPatientIntake1733161000000
     `);
 
     // 3. Migrar datos existentes: extraer código país y número
-    // Formato actual: "+56 9 1234 5678" o "+56912345678"
+    // Formato actual: "+56 9 1234 5678" o "+56912345678" o "912345678"
     await queryRunner.query(`
       UPDATE patient_intakes 
       SET 
         "telefonoCodigoPais" = CASE 
+          WHEN telefono LIKE '+%' AND POSITION(' ' IN telefono) > 0 THEN 
+            -- Formato: "+56 912345678" (con espacio)
+            SUBSTRING(telefono FROM 1 FOR POSITION(' ' IN telefono) - 1)
           WHEN telefono LIKE '+%' THEN 
-            SUBSTRING(telefono FROM 1 FOR POSITION(' ' IN telefono || ' ') - 1)
-          ELSE '+56'
+            -- Formato: "+56912345678" (sin espacio) - extraer solo +56
+            SUBSTRING(telefono FROM 1 FOR 3)
+          ELSE 
+            -- Sin código de país, asumir Chile
+            '+56'
         END,
         "telefonoNumero" = CASE 
-          WHEN telefono LIKE '+%' THEN 
+          WHEN telefono LIKE '+%' AND POSITION(' ' IN telefono) > 0 THEN 
+            -- Formato: "+56 912345678" (con espacio)
             REGEXP_REPLACE(
-              SUBSTRING(telefono FROM POSITION(' ' IN telefono || ' ')), 
+              SUBSTRING(telefono FROM POSITION(' ' IN telefono) + 1), 
               '[^0-9]', 
               '', 
               'g'
             )
-          ELSE REGEXP_REPLACE(telefono, '[^0-9]', '', 'g')
+          WHEN telefono LIKE '+%' THEN 
+            -- Formato: "+56912345678" (sin espacio) - extraer desde posición 4
+            SUBSTRING(telefono FROM 4)
+          ELSE 
+            -- Sin código de país, usar todo el número
+            REGEXP_REPLACE(telefono, '[^0-9]', '', 'g')
         END
       WHERE telefono IS NOT NULL;
     `);

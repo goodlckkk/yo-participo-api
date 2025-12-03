@@ -50,10 +50,13 @@ export class AddRecruitmentDeadlineAndResearchSiteToTrials1733154000000
     );
 
     // 4. Actualizar el ENUM TYPE de PostgreSQL para incluir los nuevos estados
-    // IMPORTANTE: PostgreSQL no permite modificar ENUMs directamente,
-    // hay que crear uno nuevo y migrar los datos
+    // IMPORTANTE: PostgreSQL requiere que los nuevos valores de ENUM
+    // se agreguen FUERA de una transacción
     
-    // Paso 1: Agregar los nuevos valores al enum existente
+    // Liberar la transacción actual
+    await queryRunner.commitTransaction();
+    
+    // Agregar los nuevos valores al enum (fuera de transacción)
     await queryRunner.query(`
       ALTER TYPE trials_status_enum ADD VALUE IF NOT EXISTS 'PREPARATION';
     `);
@@ -61,6 +64,11 @@ export class AddRecruitmentDeadlineAndResearchSiteToTrials1733154000000
     await queryRunner.query(`
       ALTER TYPE trials_status_enum ADD VALUE IF NOT EXISTS 'FOLLOW_UP';
     `);
+    
+    console.log('✅ Valores PREPARATION y FOLLOW_UP agregados al enum');
+    
+    // Iniciar nueva transacción
+    await queryRunner.startTransaction();
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
