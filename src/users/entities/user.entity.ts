@@ -17,13 +17,13 @@ import {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   
-    @Column({ length: 255 })
+    @Column({ type: 'varchar', length: 255 })
     fullName: string;
   
-    @Column({ unique: true, length: 255 })
+    @Column({ type: 'varchar', unique: true, length: 255 })
     email: string;
   
-    @Column({ length: 255 })
+    @Column({ type: 'varchar', length: 255 })
     password: string;
   
     @Column({
@@ -33,7 +33,7 @@ import {
     })
     role: UserRole;
   
-    @Column({ length: 50, nullable: true })
+    @Column({ type: 'varchar', length: 50, nullable: true })
     phone: string;
   
     @Column({ type: 'date', nullable: true })

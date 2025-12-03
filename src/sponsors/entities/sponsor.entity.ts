@@ -21,13 +21,13 @@ import {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   
-    @Column({ length: 255, unique: true })
+    @Column({ type: 'varchar', length: 255, unique: true })
     name: string;
   
     @Column({ type: 'text', nullable: true })
     description: string;
   
-    @Column({ length: 255, nullable: true })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     web_site: string;
   
     /**
