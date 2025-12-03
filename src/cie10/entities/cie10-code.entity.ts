@@ -35,7 +35,7 @@ export class Cie10Code {
    * Código CIE-10 (ej: "E11.9", "I10", "C50")
    * Único en la base de datos
    */
-  @Column({ length: 10, unique: true })
+  @Column({ type: 'varchar', length: 10, unique: true })
   codigo: string;
 
   /**
@@ -49,7 +49,7 @@ export class Cie10Code {
    * Código del padre en la jerarquía (opcional)
    * Ej: Para "E11.9", el padre sería "E11"
    */
-  @Column({ length: 10, nullable: true })
+  @Column({ type: 'varchar', length: 10, nullable: true })
   codigo_padre: string | null;
 
   /**
@@ -72,7 +72,7 @@ export class Cie10Code {
   /**
    * Rango del capítulo (ej: "E00-E90")
    */
-  @Column({ length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   rango_capitulo: string | null;
 
   /**

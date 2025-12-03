@@ -30,7 +30,7 @@ import {
     @PrimaryGeneratedColumn('uuid')
     id: string;
   
-    @Column({ length: 255 })
+    @Column({ type: 'varchar', length: 255 })
     title: string;
   
     @Column({ type: 'text' })
@@ -50,7 +50,7 @@ import {
     })
     status: TrialStatus;
   
-    @Column({ length: 255 })
+    @Column({ type: 'varchar', length: 255 })
     clinic_city: string;
 
     @Column({ type: 'int', nullable: true, default: 30 })
@@ -69,13 +69,13 @@ import {
     /**
      * URL del sitio web del centro de investigación
      */
-    @Column({ length: 500, nullable: true })
+    @Column({ type: 'varchar', length: 500, nullable: true })
     research_site_url: string;
 
     /**
      * Nombre del sitio/centro de investigación
      */
-    @Column({ length: 255, nullable: true })
+    @Column({ type: 'varchar', length: 255, nullable: true })
     research_site_name: string;
 
     @ManyToOne(() => Sponsor, { nullable: false })
