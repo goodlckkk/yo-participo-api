@@ -78,9 +78,9 @@ import {
     @Column({ type: 'varchar', length: 255, nullable: true })
     research_site_name: string;
 
-    @ManyToOne(() => Sponsor, { nullable: false })
+    @ManyToOne(() => Sponsor, { nullable: true })
     @JoinColumn({ name: 'sponsor_id' })
-    sponsor: Sponsor;
+    sponsor: Sponsor | null;
 
     /**
      * Relación con la institución/sitio de investigación
