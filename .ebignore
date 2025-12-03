@@ -1,8 +1,7 @@
 # Archivos y carpetas a ignorar en el despliegue de Elastic Beanstalk
 # Esto reduce el tamaño del bundle y acelera el despliegue
 
-# Código fuente (solo necesitamos el compilado en /dist)
-src/
+# Tests (no necesarios en producción)
 test/
 
 # Archivos de desarrollo
