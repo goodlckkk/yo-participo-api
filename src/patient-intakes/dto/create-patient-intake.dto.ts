@@ -75,9 +75,9 @@ export class CreatePatientIntakeDto {
   @IsNotEmpty()
   condicionPrincipal: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  descripcionCondicion: string;
+  descripcionCondicion?: string;
 
   @IsOptional()
   @IsString()
