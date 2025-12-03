@@ -127,27 +127,25 @@ export class TrialMatchingService {
       }
     }
 
-    // 2. Coincidencia de patologías (peso: 30 puntos)
-    if (patient.patologias && patient.patologias.length > 0) {
-      const patologyMatches = patient.patologias.filter((patologia) =>
-        trialConditions.some((condition) => this.fuzzyMatch(patologia, condition)),
-      );
-
-      if (patologyMatches.length > 0) {
-        const patologyScore = Math.min(30, patologyMatches.length * 10);
-        score += patologyScore;
-        reasons.push(`${patologyMatches.length} patología(s) coinciden`);
-      }
-    }
-
-    // 3. Coincidencia en descripción de condición (peso: 20 puntos)
+    // 2. Coincidencia en descripción de condición (peso: 20 puntos)
     if (patient.descripcionCondicion && trialConditions.length > 0) {
       const descriptionMatch = trialConditions.some((condition) =>
-        this.fuzzyMatch(patient.descripcionCondicion, condition),
+        this.fuzzyMatch(patient.descripcionCondicion || '', condition),
       );
       if (descriptionMatch) {
         score += 20;
         reasons.push('Descripción de condición coincide');
+      }
+    }
+
+    // 3. Coincidencia en otras enfermedades (peso: 20 puntos)
+    if (patient.otrasEnfermedades && trialConditions.length > 0) {
+      const otherMatch = trialConditions.some((condition) =>
+        this.fuzzyMatch(patient.otrasEnfermedades || '', condition),
+      );
+      if (otherMatch) {
+        score += 20;
+        reasons.push('Otras enfermedades coinciden');
       }
     }
 
