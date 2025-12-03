@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Trial, TrialStatus } from './entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
+import { InclusionCriteria } from './interfaces/inclusion-criteria.interface';
 
 /**
  * Interfaz para representar una sugerencia de ensayo con su score de compatibilidad
@@ -65,6 +66,7 @@ export class TrialMatchingService {
 
   /**
    * Calcula el score de compatibilidad entre un paciente y un ensayo
+   * MEJORADO: Ahora usa códigos CIE-10 para matching preciso
    * 
    * @param patient - Datos del paciente
    * @param trial - Datos del ensayo
@@ -75,7 +77,43 @@ export class TrialMatchingService {
     const reasons: string[] = [];
 
     // Extraer criterios de inclusión del ensayo
-    const inclusionCriteria = trial.inclusion_criteria as any;
+    const inclusionCriteria = trial.inclusion_criteria as InclusionCriteria;
+    
+    if (!inclusionCriteria) {
+      return { trial, matchScore: 0, matchReasons: [] };
+    }
+
+    // === MATCHING CON CÓDIGOS CIE-10 (PRIORIDAD ALTA) ===
+    
+    // 1. Verificar códigos CIE-10 EXCLUIDOS (eliminatorio)
+    if (inclusionCriteria.codigos_cie10_excluidos && patient.codigos_cie10) {
+      const hasExcludedCode = patient.codigos_cie10.some(patientCode =>
+        inclusionCriteria.codigos_cie10_excluidos!.some(excludedCode =>
+          this.matchCie10Code(patientCode, excludedCode)
+        )
+      );
+      
+      if (hasExcludedCode) {
+        reasons.push('❌ Paciente tiene código CIE-10 excluido');
+        return { trial, matchScore: 0, matchReasons: reasons };
+      }
+    }
+
+    // 2. Matching de códigos CIE-10 REQUERIDOS (peso: 50 puntos)
+    if (inclusionCriteria.codigos_cie10_requeridos && patient.codigos_cie10) {
+      const matchedCodes = patient.codigos_cie10.filter(patientCode =>
+        inclusionCriteria.codigos_cie10_requeridos!.some(requiredCode =>
+          this.matchCie10Code(patientCode, requiredCode)
+        )
+      );
+
+      if (matchedCodes.length > 0) {
+        score += 50;
+        reasons.push(`✓ ${matchedCodes.length} código(s) CIE-10 coinciden: ${matchedCodes.join(', ')}`);
+      }
+    }
+
+    // === MATCHING CON TEXTO LIBRE (LEGACY) ===
     const trialConditions = this.extractConditionsFromCriteria(inclusionCriteria);
 
     // 1. Coincidencia de condición principal (peso: 40 puntos)
@@ -187,5 +225,43 @@ export class TrialMatchingService {
     );
 
     return commonWords.length >= 2;
+  }
+
+  /**
+   * Compara dos códigos CIE-10 considerando jerarquía
+   * 
+   * Ejemplos:
+   * - matchCie10Code("E11.9", "E11") => true (E11.9 es subcategoría de E11)
+   * - matchCie10Code("E11", "E11.9") => true (E11 incluye todas sus subcategorías)
+   * - matchCie10Code("E11.9", "E11.9") => true (exacto)
+   * - matchCie10Code("E11.9", "E10") => false (diferentes categorías)
+   * 
+   * @param patientCode - Código CIE-10 del paciente
+   * @param criteriaCode - Código CIE-10 del criterio del ensayo
+   * @returns true si hay coincidencia
+   */
+  private matchCie10Code(patientCode: string, criteriaCode: string): boolean {
+    // Normalizar códigos (mayúsculas, sin espacios)
+    const patient = patientCode.toUpperCase().trim();
+    const criteria = criteriaCode.toUpperCase().trim();
+
+    // Coincidencia exacta
+    if (patient === criteria) {
+      return true;
+    }
+
+    // Coincidencia jerárquica: el paciente tiene una subcategoría del criterio
+    // Ej: paciente tiene "E11.9" y criterio es "E11"
+    if (patient.startsWith(criteria)) {
+      return true;
+    }
+
+    // Coincidencia jerárquica inversa: el criterio es más específico que el paciente
+    // Ej: paciente tiene "E11" y criterio es "E11.9"
+    if (criteria.startsWith(patient)) {
+      return true;
+    }
+
+    return false;
   }
 }

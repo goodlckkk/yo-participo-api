@@ -47,8 +47,26 @@ export class PatientIntake {
   @Column({ length: 20 })
   sexo: string;
 
-  @Column({ length: 30 })
-  telefono: string;
+  /**
+   * Teléfono completo (legacy, mantener por compatibilidad)
+   * Formato: "+56 9 1234 5678"
+   */
+  @Column({ length: 30, nullable: true })
+  telefono: string | null;
+
+  /**
+   * Código de país del teléfono
+   * Ejemplos: "+56" (Chile), "+1" (USA), "+34" (España)
+   */
+  @Column({ length: 5, nullable: true })
+  telefonoCodigoPais: string | null;
+
+  /**
+   * Número de teléfono sin código de país
+   * Ejemplo: "912345678"
+   */
+  @Column({ length: 20, nullable: true })
+  telefonoNumero: string | null;
 
   @Column({ length: 255 })
   email: string;
@@ -79,6 +97,21 @@ export class PatientIntake {
 
   @Column({ type: 'jsonb', nullable: true })
   patologias: string[];
+
+  /**
+   * Códigos CIE-10 de las enfermedades del paciente
+   * Array de códigos (ej: ["E11.9", "I10", "E78.5"])
+   * Estos códigos se usan para matching preciso con ensayos clínicos
+   */
+  @Column({ type: 'jsonb', nullable: true })
+  codigos_cie10: string[] | null;
+
+  /**
+   * Otras enfermedades en texto libre
+   * Para condiciones que no tienen código CIE-10 asignado
+   */
+  @Column({ type: 'text', nullable: true })
+  otrasEnfermedades: string | null;
 
   @Column({ default: false })
   aceptaTerminos: boolean;

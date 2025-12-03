@@ -15,6 +15,10 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { StatsModule } from './stats/stats.module';
 import { SponsorsModule } from './sponsors/sponsors.module';
+import { ResearchSitesModule } from './research-sites/research-sites.module';
+import { ResearchSite } from './research-sites/entities/research-site.entity';
+import { Cie10Module } from './cie10/cie10.module';
+import { Cie10Code } from './cie10/entities/cie10-code.entity';
 
 @Module({
   imports: [
@@ -44,7 +48,7 @@ import { SponsorsModule } from './sponsors/sponsors.module';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
-        entities: [Sponsor, User, Trial, PatientIntake],
+        entities: [Sponsor, User, Trial, PatientIntake, ResearchSite, Cie10Code],
         synchronize: false, // SIEMPRE false - usamos migraciones
         ssl: {
           rejectUnauthorized: false,
@@ -58,6 +62,8 @@ import { SponsorsModule } from './sponsors/sponsors.module';
     PatientIntakesModule,
     StatsModule,
     SponsorsModule,
+    ResearchSitesModule,
+    Cie10Module,
   ],
   controllers: [AppController],
   providers: [
