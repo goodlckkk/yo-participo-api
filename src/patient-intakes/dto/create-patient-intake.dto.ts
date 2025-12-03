@@ -94,11 +94,6 @@ export class CreatePatientIntakeDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  patologias?: string[];
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
   codigos_cie10?: string[];
 
   @IsOptional()
