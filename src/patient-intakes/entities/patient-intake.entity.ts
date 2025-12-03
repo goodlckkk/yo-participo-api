@@ -17,14 +17,16 @@ export enum PatientIntakeStatus {
 
 /**
  * Origen de la postulación del paciente:
- * - WEB: Creado a través del formulario público web
- * - MANUAL: Creado manualmente por un administrador en el dashboard
- * - REFERRAL: Referido por un médico u otra fuente (futuro)
+ * - WEB_FORM: Creado a través del formulario público web
+ * - MANUAL_ENTRY: Creado manualmente por un administrador en el dashboard
+ * - REFERRAL: Referido por un médico u otra fuente
+ * - OTHER: Otro origen no especificado
  */
 export enum PatientIntakeSource {
-  WEB = 'WEB',
-  MANUAL = 'MANUAL',
+  WEB_FORM = 'WEB_FORM',
+  MANUAL_ENTRY = 'MANUAL_ENTRY',
   REFERRAL = 'REFERRAL',
+  OTHER = 'OTHER',
 }
 
 @Entity('patient_intakes')
@@ -83,8 +85,8 @@ export class PatientIntake {
   @Column({ type: 'varchar', length: 255 })
   condicionPrincipal: string;
 
-  @Column({ type: 'text' })
-  descripcionCondicion: string;
+  @Column({ type: 'text', nullable: true })
+  descripcionCondicion: string | null;
 
   @Column({ type: 'text', nullable: true })
   medicamentosActuales: string | null;
@@ -95,8 +97,6 @@ export class PatientIntake {
   @Column({ type: 'text', nullable: true })
   cirugiasPrevias: string | null;
 
-  @Column({ type: 'jsonb', nullable: true })
-  patologias: string[];
 
   /**
    * Códigos CIE-10 de las enfermedades del paciente
@@ -127,13 +127,13 @@ export class PatientIntake {
   status: PatientIntakeStatus;
 
   /**
-   * Origen de la postulación: WEB (formulario público) o MANUAL (dashboard admin)
-   * Por defecto es WEB para mantener compatibilidad con registros existentes
+   * Origen de la postulación: WEB_FORM (formulario público) o MANUAL_ENTRY (dashboard admin)
+   * Por defecto es WEB_FORM para mantener compatibilidad con registros existentes
    */
   @Column({
     type: 'enum',
     enum: PatientIntakeSource,
-    default: PatientIntakeSource.WEB,
+    default: PatientIntakeSource.WEB_FORM,
   })
   source: PatientIntakeSource;
 
