@@ -49,51 +49,33 @@ export class AddRecruitmentDeadlineAndResearchSiteToTrials1733154000000
       }),
     );
 
-    // 4. Actualizar el enum de status para incluir los nuevos estados
-    // Nota: La actualización de ACTIVE -> FOLLOW_UP se hace en migración anterior
+    // 4. Actualizar el ENUM TYPE de PostgreSQL para incluir los nuevos estados
+    // IMPORTANTE: PostgreSQL no permite modificar ENUMs directamente,
+    // hay que crear uno nuevo y migrar los datos
     
-    // Agregar constraint para validar los valores permitidos
+    // Paso 1: Agregar los nuevos valores al enum existente
     await queryRunner.query(`
-      ALTER TABLE trials 
-      DROP CONSTRAINT IF EXISTS trials_status_check;
+      ALTER TYPE trials_status_enum ADD VALUE IF NOT EXISTS 'PREPARATION';
     `);
     
     await queryRunner.query(`
-      ALTER TABLE trials 
-      ADD CONSTRAINT trials_status_check 
-      CHECK (status IN ('PREPARATION', 'RECRUITING', 'FOLLOW_UP', 'CLOSED'));
+      ALTER TYPE trials_status_enum ADD VALUE IF NOT EXISTS 'FOLLOW_UP';
     `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    // Revertir constraint
-    await queryRunner.query(`
-      ALTER TABLE trials 
-      DROP CONSTRAINT IF EXISTS trials_status_check;
-    `);
-
-    // Revertir cambios en status (FOLLOW_UP -> ACTIVE)
-    await queryRunner.query(`
-      UPDATE trials 
-      SET status = 'ACTIVE' 
-      WHERE status = 'FOLLOW_UP';
-    `);
-
+    // NOTA: PostgreSQL no permite eliminar valores de un ENUM TYPE si están en uso
+    // Por lo tanto, solo revertimos las columnas agregadas
+    
     // Eliminar columnas agregadas
     await queryRunner.dropColumn('trials', 'research_site_name');
     await queryRunner.dropColumn('trials', 'research_site_url');
     await queryRunner.dropColumn('trials', 'recruitment_deadline');
-
-    // Restaurar enum original
-    await queryRunner.query(`
-      ALTER TABLE trials 
-      ALTER COLUMN status TYPE varchar(50);
-    `);
-
-    await queryRunner.query(`
-      ALTER TABLE trials 
-      ADD CONSTRAINT trials_status_check_old 
-      CHECK (status IN ('RECRUITING', 'ACTIVE', 'CLOSED'));
-    `);
+    
+    // Para revertir completamente el enum, habría que:
+    // 1. Cambiar todos los valores FOLLOW_UP y PREPARATION a otros estados
+    // 2. Recrear el enum sin esos valores
+    // Esto es destructivo, así que lo dejamos como está
+    console.log('⚠️  ADVERTENCIA: Los valores PREPARATION y FOLLOW_UP permanecen en el enum');
   }
 }
