@@ -32,55 +32,55 @@ export class PatientIntake {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   nombres: string;
 
-  @Column({ length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   apellidos: string;
 
-  @Column({ length: 20 })
+  @Column({ type: 'varchar', length: 20 })
   rut: string;
 
   @Column({ type: 'date' })
   fechaNacimiento: string;
 
-  @Column({ length: 20 })
+  @Column({ type: 'varchar', length: 20 })
   sexo: string;
 
   /**
    * Teléfono completo (legacy, mantener por compatibilidad)
    * Formato: "+56 9 1234 5678"
    */
-  @Column({ length: 30, nullable: true })
+  @Column({ type: 'varchar', length: 30, nullable: true })
   telefono: string | null;
 
   /**
    * Código de país del teléfono
    * Ejemplos: "+56" (Chile), "+1" (USA), "+34" (España)
    */
-  @Column({ length: 5, nullable: true })
+  @Column({ type: 'varchar', length: 5, nullable: true })
   telefonoCodigoPais: string | null;
 
   /**
    * Número de teléfono sin código de país
    * Ejemplo: "912345678"
    */
-  @Column({ length: 20, nullable: true })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   telefonoNumero: string | null;
 
-  @Column({ length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   email: string;
 
-  @Column({ length: 100 })
+  @Column({ type: 'varchar', length: 100 })
   region: string;
 
-  @Column({ length: 100 })
+  @Column({ type: 'varchar', length: 100 })
   comuna: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   direccion: string | null;
 
-  @Column({ length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   condicionPrincipal: string;
 
   @Column({ type: 'text' })
