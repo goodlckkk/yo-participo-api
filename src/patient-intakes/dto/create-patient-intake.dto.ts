@@ -77,6 +77,15 @@ export class CreatePatientIntakeDto {
 
   @IsOptional()
   @IsString()
+  condicionPrincipalCodigo?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  patologias?: string[];
+
+  @IsOptional()
+  @IsString()
   descripcionCondicion?: string;
 
   @IsOptional()
