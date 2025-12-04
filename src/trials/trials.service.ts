@@ -16,17 +16,34 @@ export class TrialsService {
   ) {}
 
   async create(createTrialDto: CreateTrialDto) {
-    const { sponsor_id, research_site_id, ...trialData } = createTrialDto;
+    try {
+      const { sponsor_id, research_site_id, ...trialData } = createTrialDto;
 
-    const newTrial = this.trialRepository.create({
-      ...trialData,
-      // Solo asignar sponsor si se proporciona sponsor_id
-      ...(sponsor_id && { sponsor: { id: sponsor_id } }),
-      // Asignar research site usando solo el ID (TypeORM manejará la relación)
-      ...(research_site_id && { researchSite: { id: research_site_id } }),
-    });
+      console.log('📝 Creando trial con datos:', {
+        sponsor_id,
+        research_site_id,
+        trialData
+      });
 
-    return this.trialRepository.save(newTrial);
+      const newTrial = this.trialRepository.create({
+        ...trialData,
+        // Solo asignar sponsor si se proporciona sponsor_id
+        ...(sponsor_id && { sponsor: { id: sponsor_id } }),
+        // Asignar research site usando solo el ID (TypeORM manejará la relación)
+        ...(research_site_id && { researchSite: { id: research_site_id } }),
+      });
+
+      console.log('✅ Trial creado en memoria:', newTrial);
+
+      const savedTrial = await this.trialRepository.save(newTrial);
+      
+      console.log('💾 Trial guardado en BD:', savedTrial);
+      
+      return savedTrial;
+    } catch (error) {
+      console.error('❌ Error al crear trial:', error);
+      throw error;
+    }
   }
 
   async findAll(status?: TrialStatus, page = 1, limit = 10) {
