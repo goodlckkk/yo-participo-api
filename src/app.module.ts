@@ -21,6 +21,8 @@ import { Cie10Module } from './cie10/cie10.module';
 import { Cie10Code } from './cie10/entities/cie10-code.entity';
 import { HeroSlidesModule } from './hero-slides/hero-slides.module';
 import { HeroSlide } from './hero-slides/entities/hero-slide.entity';
+import { SuccessStoriesModule } from './success-stories/success-stories.module';
+import { SuccessStory } from './success-stories/entities/success-story.entity';
 
 @Module({
   imports: [
@@ -50,7 +52,7 @@ import { HeroSlide } from './hero-slides/entities/hero-slide.entity';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
-        entities: [Sponsor, User, Trial, PatientIntake, ResearchSite, Cie10Code, HeroSlide],
+        entities: [Sponsor, User, Trial, PatientIntake, ResearchSite, Cie10Code, HeroSlide, SuccessStory],
         synchronize: false, // SIEMPRE false - usamos migraciones
         ssl: {
           rejectUnauthorized: false,
@@ -67,6 +69,7 @@ import { HeroSlide } from './hero-slides/entities/hero-slide.entity';
     ResearchSitesModule,
     Cie10Module,
     HeroSlidesModule,
+    SuccessStoriesModule,
   ],
   controllers: [AppController],
   providers: [
