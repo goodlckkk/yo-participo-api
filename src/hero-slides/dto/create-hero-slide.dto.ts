@@ -9,10 +9,9 @@ import { IsString, IsOptional, IsInt, IsBoolean, IsUrl, MaxLength } from 'class-
 export class CreateHeroSlideDto {
   /**
    * URL de la imagen del slide
-   * Puede ser una URL completa o ruta relativa
+   * Puede ser una URL completa, ruta relativa o imagen en base64
    */
   @IsString()
-  @MaxLength(500)
   imageUrl: string;
 
   /**
