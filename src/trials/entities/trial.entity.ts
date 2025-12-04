@@ -50,9 +50,6 @@ import {
     })
     status: TrialStatus;
   
-    @Column({ type: 'varchar', length: 255 })
-    clinic_city: string;
-
     @Column({ type: 'int', nullable: true, default: 30 })
     max_participants: number;
 
