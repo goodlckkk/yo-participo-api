@@ -22,8 +22,8 @@ export class TrialsService {
       ...trialData,
       // Solo asignar sponsor si se proporciona sponsor_id
       ...(sponsor_id && { sponsor: { id: sponsor_id } }),
-      // Asignar research site (obligatorio)
-      researchSite: { id: research_site_id },
+      // Asignar research site usando solo el ID (TypeORM manejará la relación)
+      ...(research_site_id && { researchSite: { id: research_site_id } }),
     });
 
     return this.trialRepository.save(newTrial);
