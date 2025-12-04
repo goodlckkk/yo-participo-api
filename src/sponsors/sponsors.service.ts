@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { Sponsor } from './entities/sponsor.entity';
@@ -57,7 +57,18 @@ export class SponsorsService {
     await this.sponsorRepository.remove(sponsor);
   }
 
-  create(createSponsorDto: CreateSponsorDto): Promise<Sponsor> {
+  async create(createSponsorDto: CreateSponsorDto): Promise<Sponsor> {
+    // Verificar si ya existe un sponsor con ese nombre
+    const existente = await this.sponsorRepository.findOne({
+      where: { name: createSponsorDto.name },
+    });
+
+    if (existente) {
+      throw new ConflictException(
+        `Ya existe un sponsor con el nombre "${createSponsorDto.name}"`,
+      );
+    }
+
     const sponsor = this.sponsorRepository.create(createSponsorDto);
     return this.sponsorRepository.save(sponsor);
   }
