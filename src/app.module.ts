@@ -19,6 +19,8 @@ import { ResearchSitesModule } from './research-sites/research-sites.module';
 import { ResearchSite } from './research-sites/entities/research-site.entity';
 import { Cie10Module } from './cie10/cie10.module';
 import { Cie10Code } from './cie10/entities/cie10-code.entity';
+import { HeroSlidesModule } from './hero-slides/hero-slides.module';
+import { HeroSlide } from './hero-slides/entities/hero-slide.entity';
 
 @Module({
   imports: [
@@ -48,7 +50,7 @@ import { Cie10Code } from './cie10/entities/cie10-code.entity';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
-        entities: [Sponsor, User, Trial, PatientIntake, ResearchSite, Cie10Code],
+        entities: [Sponsor, User, Trial, PatientIntake, ResearchSite, Cie10Code, HeroSlide],
         synchronize: false, // SIEMPRE false - usamos migraciones
         ssl: {
           rejectUnauthorized: false,
@@ -64,6 +66,7 @@ import { Cie10Code } from './cie10/entities/cie10-code.entity';
     SponsorsModule,
     ResearchSitesModule,
     Cie10Module,
+    HeroSlidesModule,
   ],
   controllers: [AppController],
   providers: [
