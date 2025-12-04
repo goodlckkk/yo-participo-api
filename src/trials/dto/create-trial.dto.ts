@@ -13,9 +13,9 @@ export class CreateTrialDto {
   @IsObject()
   inclusion_criteria: object;
 
-  @IsString()
+  @IsUUID()
   @IsNotEmpty()
-  clinic_city: string;
+  research_site_id: string;
 
   @IsInt()
   @Min(1)

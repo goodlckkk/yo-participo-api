@@ -16,12 +16,14 @@ export class TrialsService {
   ) {}
 
   async create(createTrialDto: CreateTrialDto) {
-    const { sponsor_id, ...trialData } = createTrialDto;
+    const { sponsor_id, research_site_id, ...trialData } = createTrialDto;
 
     const newTrial = this.trialRepository.create({
       ...trialData,
       // Solo asignar sponsor si se proporciona sponsor_id
       ...(sponsor_id && { sponsor: { id: sponsor_id } }),
+      // Asignar research site (obligatorio)
+      researchSite: { id: research_site_id },
     });
 
     return this.trialRepository.save(newTrial);
@@ -101,9 +103,15 @@ export class TrialsService {
   }
 
   async update(id: string, updateTrialDto: UpdateTrialDto) {
+    const { sponsor_id, research_site_id, ...trialData } = updateTrialDto;
+
     const trial = await this.trialRepository.preload({
       id,
-      ...updateTrialDto,
+      ...trialData,
+      // Solo actualizar sponsor si se proporciona sponsor_id
+      ...(sponsor_id && { sponsor: { id: sponsor_id } }),
+      // Solo actualizar research site si se proporciona research_site_id
+      ...(research_site_id && { researchSite: { id: research_site_id } }),
     });
 
     if (!trial) {
