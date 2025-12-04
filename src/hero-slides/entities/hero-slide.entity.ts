@@ -19,9 +19,9 @@ export class HeroSlide {
 
   /**
    * URL de la imagen del slide
-   * Puede ser una URL completa o una ruta relativa
+   * Puede ser una URL completa, una ruta relativa o una imagen en base64
    */
-  @Column({ type: 'varchar', length: 500 })
+  @Column({ type: 'text' })
   imageUrl: string;
 
   /**

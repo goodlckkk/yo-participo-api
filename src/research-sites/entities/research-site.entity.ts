@@ -34,6 +34,9 @@ export class ResearchSite {
   ciudad: string | null;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
+  comuna: string | null;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
   region: string | null;
 
   @Column({ type: 'varchar', length: 30, nullable: true })
