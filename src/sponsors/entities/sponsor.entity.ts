@@ -25,10 +25,10 @@ import {
     name: string;
   
     @Column({ type: 'text', nullable: true })
-    description: string;
+    description: string | null;
   
     @Column({ type: 'varchar', length: 255, nullable: true })
-    web_site: string;
+    web_site: string | null;
   
     /**
      * Tipo de patrocinador: SPONSOR o CRO

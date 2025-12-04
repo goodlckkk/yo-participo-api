@@ -35,6 +35,11 @@ export class CreateResearchSiteDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
+  comuna?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
   region?: string;
 
   @IsOptional()
