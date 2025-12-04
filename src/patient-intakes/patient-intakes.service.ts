@@ -25,6 +25,7 @@ export class PatientIntakesService {
 
   async findAll() {
     return this.patientIntakeRepository.find({
+      relations: ['trial'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -32,6 +33,7 @@ export class PatientIntakesService {
   async findOne(id: string) {
     const intake = await this.patientIntakeRepository.findOne({
       where: { id },
+      relations: ['trial'],
     });
 
     if (!intake) {

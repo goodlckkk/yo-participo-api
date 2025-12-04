@@ -154,7 +154,7 @@ export class PatientIntake {
   @Column({ type: 'uuid', nullable: true })
   trialId: string | null;
 
-  @ManyToOne(() => Trial, { nullable: true })
+  @ManyToOne(() => Trial, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'trialId' })
   trial: Trial | null;
 
