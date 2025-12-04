@@ -4,7 +4,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { ResearchSite } from './entities/research-site.entity';
 import { CreateResearchSiteDto } from './dto/create-research-site.dto';
 import { UpdateResearchSiteDto } from './dto/update-research-site.dto';
@@ -69,7 +69,7 @@ export class ResearchSitesService {
 
     return this.researchSiteRepository.find({
       where: {
-        nombre: Like(`%${query}%`),
+        nombre: ILike(`%${query}%`),
         activo: true,
       },
       order: { nombre: 'ASC' },
