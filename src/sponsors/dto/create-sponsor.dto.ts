@@ -6,15 +6,15 @@ export class CreateSponsorDto {
   @MinLength(1)
   name: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   description?: string;
 
-  @IsUrl()
   @IsOptional()
+  @IsUrl({}, { message: 'El sitio web debe ser una URL válida' })
   web_site?: string;
 
-  @IsEnum(SponsorType)
-  @IsOptional() // Tipo de sponsor es opcional, por defecto será SPONSOR
+  @IsOptional()
+  @IsEnum(SponsorType, { message: 'El tipo debe ser SPONSOR o CRO' })
   sponsor_type?: SponsorType;
 }
