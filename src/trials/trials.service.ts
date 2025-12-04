@@ -74,11 +74,8 @@ export class TrialsService {
           where: { trialId: trial.id },
         });
         
-        // Forzar serialización completa del objeto trial
-        const trialPlain = JSON.parse(JSON.stringify(trial));
-        
         return {
-          ...trialPlain,
+          ...trial,
           current_participants: patientCount,
         };
       })
@@ -110,11 +107,8 @@ export class TrialsService {
       where: { trialId: trial.id },
     });
 
-    // Forzar serialización completa del objeto trial
-    const trialPlain = JSON.parse(JSON.stringify(trial));
-
     return {
-      ...trialPlain,
+      ...trial,
       current_participants: patientCount,
     };
   }
