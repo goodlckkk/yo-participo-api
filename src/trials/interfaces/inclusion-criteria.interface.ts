@@ -11,17 +11,48 @@ export interface InclusionCriteria {
   // Género
   genero?: string; // "Hombre", "Mujer", "Todos"
 
-  // Códigos CIE-10 requeridos (el paciente DEBE tener al menos uno)
+  // Condición médica principal del ensayo (con código y nombre)
+  condicionPrincipal?: {
+    codigo: string;
+    nombre: string;
+  };
+
+  // Condiciones requeridas estructuradas (código + nombre)
+  condicionesRequeridas?: Array<{
+    codigo: string;
+    nombre: string;
+  }>;
+
+  // Condiciones excluidas estructuradas (código + nombre)
+  condicionesExcluidas?: Array<{
+    codigo: string;
+    nombre: string;
+  }>;
+
+  // Alergias excluidas estructuradas (código + nombre)
+  alergiasExcluidas?: Array<{
+    codigo: string;
+    nombre: string;
+  }>;
+
+  // Códigos CIE-10 requeridos (legacy, mantener por compatibilidad)
   codigos_cie10_requeridos?: string[]; // ["E11", "E10"]
 
-  // Códigos CIE-10 excluidos (el paciente NO debe tener ninguno)
+  // Códigos CIE-10 excluidos (legacy, mantener por compatibilidad)
   codigos_cie10_excluidos?: string[]; // ["I50", "N18"]
 
   // Condiciones en texto libre (legacy, mantener por compatibilidad)
   condiciones_requeridas?: string[];
   condiciones_excluidas?: string[];
 
-  // Medicamentos prohibidos
+  // Medicamentos prohibidos estructurados (híbrido: autocomplete + texto libre)
+  medicamentosProhibidosEstructurados?: Array<{
+    nombre: string;
+    dosis?: string;
+    frecuencia?: string;
+  }>;
+
+  // Medicamentos prohibidos (texto libre, no hay CIE-10 para medicamentos)
   medicamentos_prohibidos?: string[];
 
   // Otros criterios en texto libre
