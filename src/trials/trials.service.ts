@@ -132,16 +132,25 @@ export class TrialsService {
     return this.trialRepository.save(trial);
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     const trial = await this.findOne(id);
     
-    // Primero, desvincular todos los pacientes de este trial (SET NULL)
-    await this.patientIntakeRepository.update(
-      { trialId: id },
-      { trialId: null }
-    );
-    
-    // Ahora podemos eliminar el trial de forma segura
-    await this.trialRepository.remove(trial);
+    try {
+      // Primero, desvincular todos los pacientes de este trial (SET NULL)
+      await this.patientIntakeRepository
+        .createQueryBuilder()
+        .update(PatientIntake)
+        .set({ trialId: null })
+        .where('trialId = :trialId', { trialId: id })
+        .execute();
+      
+      // Ahora podemos eliminar el trial de forma segura
+      await this.trialRepository.remove(trial);
+      
+      console.log(`✅ Trial "${trial.title}" eliminado exitosamente`);
+    } catch (error) {
+      console.error('❌ Error al eliminar trial:', error);
+      throw error;
+    }
   }
 }
