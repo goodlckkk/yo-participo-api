@@ -9,10 +9,21 @@ import {
 import { Trial } from '../../trials/entities/trial.entity';
 import { ResearchSite } from '../../research-sites/entities/research-site.entity';
 
+/**
+ * Estados del flujo de pacientes:
+ * - RECEIVED: Paciente recibido (estado inicial)
+ * - VERIFIED: Paciente verificado (datos confirmados)
+ * - STUDY_ASSIGNED: Paciente asignado a un estudio clínico
+ * - AWAITING_STUDY: En espera de asignación a estudio
+ * - PENDING_CONTACT: Pendiente de contacto
+ * - DISCARDED: Descartado o eliminado (soft delete)
+ */
 export enum PatientIntakeStatus {
   RECEIVED = 'RECEIVED',
-  REVIEWING = 'REVIEWING',
-  CONTACTED = 'CONTACTED',
+  VERIFIED = 'VERIFIED',
+  STUDY_ASSIGNED = 'STUDY_ASSIGNED',
+  AWAITING_STUDY = 'AWAITING_STUDY',
+  PENDING_CONTACT = 'PENDING_CONTACT',
   DISCARDED = 'DISCARDED',
 }
 

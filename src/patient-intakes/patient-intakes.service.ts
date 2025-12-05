@@ -25,7 +25,7 @@ export class PatientIntakesService {
 
   async findAll() {
     return this.patientIntakeRepository.find({
-      relations: ['trial'],
+      relations: ['trial', 'referralResearchSite'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -33,7 +33,7 @@ export class PatientIntakesService {
   async findOne(id: string) {
     const intake = await this.patientIntakeRepository.findOne({
       where: { id },
-      relations: ['trial'],
+      relations: ['trial', 'referralResearchSite'],
     });
 
     if (!intake) {
@@ -63,11 +63,21 @@ export class PatientIntakesService {
   }
 
   /**
-   * Elimina un paciente del sistema
+   * Elimina un paciente del sistema (SOFT DELETE)
+   * En lugar de eliminar físicamente, marca el paciente como DISCARDED
+   * Esto mantiene el historial y la integridad referencial
    */
   async remove(id: string) {
     const intake = await this.findOne(id);
-    await this.patientIntakeRepository.remove(intake);
-    return { message: 'Paciente eliminado exitosamente' };
+    
+    // Soft delete: cambiar estado a DISCARDED en lugar de eliminar
+    intake.status = 'DISCARDED' as any;
+    
+    await this.patientIntakeRepository.save(intake);
+    
+    return { 
+      message: 'Paciente marcado como descartado exitosamente',
+      status: 'DISCARDED'
+    };
   }
 }

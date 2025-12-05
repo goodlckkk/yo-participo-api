@@ -6,6 +6,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { ResearchSite } from './entities/research-site.entity';
+import { Trial } from '../trials/entities/trial.entity';
+import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
 import { CreateResearchSiteDto } from './dto/create-research-site.dto';
 import { UpdateResearchSiteDto } from './dto/update-research-site.dto';
 
@@ -22,6 +24,10 @@ export class ResearchSitesService {
   constructor(
     @InjectRepository(ResearchSite)
     private readonly researchSiteRepository: Repository<ResearchSite>,
+    @InjectRepository(Trial)
+    private readonly trialRepository: Repository<Trial>,
+    @InjectRepository(PatientIntake)
+    private readonly patientIntakeRepository: Repository<PatientIntake>,
   ) {}
 
   /**
@@ -49,13 +55,35 @@ export class ResearchSitesService {
   }
 
   /**
-   * Obtener todas las instituciones activas
+   * Obtener todas las instituciones activas con contadores
    */
-  async findAll(): Promise<ResearchSite[]> {
-    return this.researchSiteRepository.find({
-      where: { activo: true },
+  async findAll(): Promise<any[]> {
+    const sites = await this.researchSiteRepository.find({
       order: { nombre: 'ASC' },
     });
+
+    // Agregar contadores de estudios y pacientes para cada sitio
+    const sitesWithCounts = await Promise.all(
+      sites.map(async (site) => {
+        // Contar estudios clínicos del sitio
+        const trialCount = await this.trialRepository.count({
+          where: { researchSite: { id: site.id } },
+        });
+
+        // Contar pacientes derivados por este sitio
+        const patientCount = await this.patientIntakeRepository.count({
+          where: { referralResearchSiteId: site.id },
+        });
+
+        return {
+          ...site,
+          trialCount,
+          patientCount,
+        };
+      })
+    );
+
+    return sitesWithCounts;
   }
 
   /**
@@ -125,25 +153,38 @@ export class ResearchSitesService {
   }
 
   /**
-   * Eliminar (desactivar) una institución
-   * No se elimina físicamente para mantener integridad referencial
+   * Eliminar una institución
+   * Solo se permite si no tiene ensayos ni pacientes asociados
    */
   async remove(id: string): Promise<{ message: string }> {
     const researchSite = await this.findOne(id);
 
-    // Verificar si tiene ensayos asociados
-    if (researchSite.trials && researchSite.trials.length > 0) {
+    // Contar ensayos asociados
+    const trialCount = await this.trialRepository.count({
+      where: { researchSite: { id: researchSite.id } },
+    });
+
+    // Contar pacientes derivados
+    const patientCount = await this.patientIntakeRepository.count({
+      where: { referralResearchSiteId: researchSite.id },
+    });
+
+    // Verificar si tiene ensayos o pacientes asociados
+    if (trialCount > 0 || patientCount > 0) {
+      const messages: string[] = [];
+      if (trialCount > 0) messages.push(`${trialCount} estudio(s) clínico(s)`);
+      if (patientCount > 0) messages.push(`${patientCount} paciente(s) derivado(s)`);
+      
       throw new ConflictException(
-        `No se puede eliminar la institución porque tiene ${researchSite.trials.length} ensayo(s) asociado(s)`,
+        `No se puede eliminar la institución porque tiene ${messages.join(' y ')} asociado(s)`,
       );
     }
 
-    // Desactivar en lugar de eliminar
-    researchSite.activo = false;
-    await this.researchSiteRepository.save(researchSite);
+    // Si no tiene relaciones, eliminar físicamente
+    await this.researchSiteRepository.remove(researchSite);
 
     return {
-      message: `Institución "${researchSite.nombre}" desactivada exitosamente`,
+      message: `Institución "${researchSite.nombre}" eliminada exitosamente`,
     };
   }
 }

@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ResearchSitesService } from './research-sites.service';
 import { ResearchSitesController } from './research-sites.controller';
 import { ResearchSite } from './entities/research-site.entity';
+import { Trial } from '../trials/entities/trial.entity';
+import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
 
 /**
  * Módulo para gestionar instituciones/sitios de investigación
@@ -11,9 +13,10 @@ import { ResearchSite } from './entities/research-site.entity';
  * - CRUD completo de instituciones
  * - Búsqueda y autocomplete
  * - Validación de nombres únicos
+ * - Contadores de estudios y pacientes
  */
 @Module({
-  imports: [TypeOrmModule.forFeature([ResearchSite])],
+  imports: [TypeOrmModule.forFeature([ResearchSite, Trial, PatientIntake])],
   controllers: [ResearchSitesController],
   providers: [ResearchSitesService],
   exports: [ResearchSitesService], // Exportar para usar en otros módulos
