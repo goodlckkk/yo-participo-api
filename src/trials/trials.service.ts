@@ -133,24 +133,32 @@ export class TrialsService {
   }
 
   async remove(id: string): Promise<void> {
-    const trial = await this.findOne(id);
+    const trial = await this.trialRepository.findOne({ where: { id } });
+    
+    if (!trial) {
+      throw new NotFoundException(`Trial con ID "${id}" no encontrado`);
+    }
     
     try {
+      console.log(`🗑️ Iniciando eliminación del trial: ${trial.title}`);
+      
       // Primero, desvincular todos los pacientes de este trial (SET NULL)
-      await this.patientIntakeRepository
+      const updateResult = await this.patientIntakeRepository
         .createQueryBuilder()
         .update(PatientIntake)
         .set({ trialId: null })
         .where('trialId = :trialId', { trialId: id })
         .execute();
       
+      console.log(`📝 Pacientes desvinculados: ${updateResult.affected || 0}`);
+      
       // Ahora podemos eliminar el trial de forma segura
-      await this.trialRepository.remove(trial);
+      await this.trialRepository.delete(id);
       
       console.log(`✅ Trial "${trial.title}" eliminado exitosamente`);
     } catch (error) {
       console.error('❌ Error al eliminar trial:', error);
-      throw error;
+      throw new Error(`Error al eliminar el trial: ${error.message}`);
     }
   }
 }

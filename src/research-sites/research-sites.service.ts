@@ -154,37 +154,51 @@ export class ResearchSitesService {
 
   /**
    * Eliminar una institución
-   * Solo se permite si no tiene ensayos ni pacientes asociados
+   * Desvincula automáticamente ensayos y pacientes asociados antes de eliminar
    */
   async remove(id: string): Promise<{ message: string }> {
-    const researchSite = await this.findOne(id);
-
-    // Contar ensayos asociados
-    const trialCount = await this.trialRepository.count({
-      where: { researchSite: { id: researchSite.id } },
+    const researchSite = await this.researchSiteRepository.findOne({
+      where: { id },
     });
 
-    // Contar pacientes derivados
-    const patientCount = await this.patientIntakeRepository.count({
-      where: { referralResearchSiteId: researchSite.id },
-    });
-
-    // Verificar si tiene ensayos o pacientes asociados
-    if (trialCount > 0 || patientCount > 0) {
-      const messages: string[] = [];
-      if (trialCount > 0) messages.push(`${trialCount} estudio(s) clínico(s)`);
-      if (patientCount > 0) messages.push(`${patientCount} paciente(s) derivado(s)`);
-      
-      throw new ConflictException(
-        `No se puede eliminar la institución porque tiene ${messages.join(' y ')} asociado(s)`,
-      );
+    if (!researchSite) {
+      throw new NotFoundException(`Institución con ID "${id}" no encontrada`);
     }
 
-    // Si no tiene relaciones, eliminar físicamente
-    await this.researchSiteRepository.remove(researchSite);
+    try {
+      console.log(`🗑️ Iniciando eliminación de institución: ${researchSite.nombre}`);
 
-    return {
-      message: `Institución "${researchSite.nombre}" eliminada exitosamente`,
-    };
+      // 1. Desvincular todos los ensayos clínicos de esta institución (SET NULL)
+      const trialsUpdated = await this.trialRepository
+        .createQueryBuilder()
+        .update(Trial)
+        .set({ researchSite: null })
+        .where('research_site_id = :siteId', { siteId: id })
+        .execute();
+
+      console.log(`📝 Ensayos desvinculados: ${trialsUpdated.affected || 0}`);
+
+      // 2. Desvincular todos los pacientes derivados por esta institución (SET NULL)
+      const patientsUpdated = await this.patientIntakeRepository
+        .createQueryBuilder()
+        .update(PatientIntake)
+        .set({ referralResearchSiteId: null })
+        .where('referralResearchSiteId = :siteId', { siteId: id })
+        .execute();
+
+      console.log(`📝 Pacientes desvinculados: ${patientsUpdated.affected || 0}`);
+
+      // 3. Ahora podemos eliminar la institución de forma segura
+      await this.researchSiteRepository.delete(id);
+
+      console.log(`✅ Institución "${researchSite.nombre}" eliminada exitosamente`);
+
+      return {
+        message: `Institución "${researchSite.nombre}" eliminada exitosamente`,
+      };
+    } catch (error) {
+      console.error('❌ Error al eliminar institución:', error);
+      throw new Error(`Error al eliminar la institución: ${error.message}`);
+    }
   }
 }

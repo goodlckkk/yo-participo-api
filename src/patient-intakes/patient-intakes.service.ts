@@ -80,4 +80,54 @@ export class PatientIntakesService {
       status: 'DISCARDED'
     };
   }
+
+  /**
+   * Elimina PERMANENTEMENTE un paciente del sistema (HARD DELETE)
+   * ⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE
+   * Solo debe usarse para limpiar datos de prueba o por solicitud explícita
+   */
+  async hardDelete(id: string): Promise<void> {
+    const intake = await this.patientIntakeRepository.findOne({ where: { id } });
+    
+    if (!intake) {
+      throw new NotFoundException(`Paciente con ID "${id}" no encontrado`);
+    }
+    
+    try {
+      console.log(`🗑️ HARD DELETE: Eliminando permanentemente paciente ${intake.nombres} ${intake.apellidos} (${intake.rut})`);
+      
+      // Eliminación física permanente de la base de datos
+      await this.patientIntakeRepository.delete(id);
+      
+      console.log(`✅ Paciente eliminado permanentemente de la base de datos`);
+    } catch (error) {
+      console.error('❌ Error al eliminar permanentemente el paciente:', error);
+      throw new Error(`Error al eliminar el paciente: ${error.message}`);
+    }
+  }
+
+  /**
+   * Elimina PERMANENTEMENTE todos los pacientes marcados como DISCARDED
+   * ⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE
+   * Útil para limpiar la base de datos de pacientes descartados
+   */
+  async hardDeleteAllDiscarded(): Promise<{ deleted: number }> {
+    try {
+      console.log(`🗑️ HARD DELETE: Eliminando todos los pacientes descartados...`);
+      
+      const result = await this.patientIntakeRepository
+        .createQueryBuilder()
+        .delete()
+        .from(PatientIntake)
+        .where('status = :status', { status: 'DISCARDED' })
+        .execute();
+      
+      console.log(`✅ ${result.affected || 0} pacientes descartados eliminados permanentemente`);
+      
+      return { deleted: result.affected || 0 };
+    } catch (error) {
+      console.error('❌ Error al eliminar pacientes descartados:', error);
+      throw new Error(`Error al eliminar pacientes descartados: ${error.message}`);
+    }
+  }
 }
