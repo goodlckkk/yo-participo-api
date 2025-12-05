@@ -46,11 +46,9 @@ export interface InclusionCriteria {
   condiciones_excluidas?: string[];
 
   // Medicamentos prohibidos estructurados (híbrido: autocomplete + texto libre)
-  medicamentosProhibidosEstructurados?: Array<{
-    nombre: string;
-    dosis?: string;
-    frecuencia?: string;
-  }>;
+  // Array de strings: ["Insulina", "Prednisona", "Warfarina"]
+  // Solo nombres de medicamentos, sin dosis ni frecuencia
+  medicamentosProhibidosEstructurados?: string[];
 
   // Medicamentos prohibidos (texto libre, no hay CIE-10 para medicamentos)
   medicamentos_prohibidos?: string[];

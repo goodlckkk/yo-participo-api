@@ -109,6 +109,20 @@ export class CreatePatientIntakeDto {
   @IsString()
   otrasEnfermedades?: string;
 
+  // Campos estructurados (nuevos)
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  medicamentosEstructurados?: string[];
+
+  @IsOptional()
+  @IsArray()
+  alergiasEstructuradas?: Array<{ codigo: string; nombre: string }>;
+
+  @IsOptional()
+  @IsArray()
+  otrasEnfermedadesEstructuradas?: Array<{ codigo: string; nombre: string }>;
+
   @IsBoolean()
   aceptaTerminos: boolean;
 
