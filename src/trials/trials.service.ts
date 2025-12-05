@@ -134,6 +134,14 @@ export class TrialsService {
 
   async remove(id: string) {
     const trial = await this.findOne(id);
+    
+    // Primero, desvincular todos los pacientes de este trial (SET NULL)
+    await this.patientIntakeRepository.update(
+      { trialId: id },
+      { trialId: null }
+    );
+    
+    // Ahora podemos eliminar el trial de forma segura
     await this.trialRepository.remove(trial);
   }
 }
