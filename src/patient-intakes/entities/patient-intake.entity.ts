@@ -105,8 +105,19 @@ export class PatientIntake {
   @Column({ type: 'text', nullable: true })
   medicamentosActuales: string | null;
 
+  /**
+   * Alergias en texto libre (legacy, mantener por compatibilidad)
+   */
   @Column({ type: 'text', nullable: true })
   alergias: string | null;
+
+  /**
+   * Alergias estructuradas con código CIE-10 y nombre
+   * Array de objetos: [{codigo: "T78.4", nombre: "Alergia no especificada"}, ...]
+   * Usado para matching preciso con ensayos clínicos
+   */
+  @Column({ type: 'jsonb', nullable: true })
+  alergiasEstructuradas: Array<{ codigo: string; nombre: string }> | null;
 
   @Column({ type: 'text', nullable: true })
   cirugiasPrevias: string | null;
@@ -121,11 +132,26 @@ export class PatientIntake {
   codigos_cie10: string[] | null;
 
   /**
-   * Otras enfermedades en texto libre
-   * Para condiciones que no tienen código CIE-10 asignado
+   * Otras enfermedades en texto libre (legacy, mantener por compatibilidad)
    */
   @Column({ type: 'text', nullable: true })
   otrasEnfermedades: string | null;
+
+  /**
+   * Otras enfermedades estructuradas con código CIE-10 y nombre
+   * Array de objetos: [{codigo: "I10", nombre: "Hipertensión arterial"}, ...]
+   * Usado para matching preciso con ensayos clínicos
+   */
+  @Column({ type: 'jsonb', nullable: true })
+  otrasEnfermedadesEstructuradas: Array<{ codigo: string; nombre: string }> | null;
+
+  /**
+   * Medicamentos actuales estructurados (híbrido: autocomplete + texto libre)
+   * Array de objetos: [{nombre: "Metformina", dosis: "850mg", frecuencia: "2 veces al día"}, ...]
+   * Permite matching preciso y también medicamentos personalizados
+   */
+  @Column({ type: 'jsonb', nullable: true })
+  medicamentosEstructurados: Array<{ nombre: string; dosis?: string; frecuencia?: string }> | null;
 
   @Column({ default: false })
   aceptaTerminos: boolean;
