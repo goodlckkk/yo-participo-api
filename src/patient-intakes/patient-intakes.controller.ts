@@ -41,4 +41,24 @@ export class PatientIntakesController {
   remove(@Param('id') id: string) {
     return this.patientIntakesService.remove(id);
   }
+
+  /**
+   * Elimina PERMANENTEMENTE un paciente de la base de datos
+   * ⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':id/permanent')
+  hardDelete(@Param('id') id: string) {
+    return this.patientIntakesService.hardDelete(id);
+  }
+
+  /**
+   * Elimina PERMANENTEMENTE todos los pacientes marcados como DISCARDED
+   * ⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('discarded/purge')
+  hardDeleteAllDiscarded() {
+    return this.patientIntakesService.hardDeleteAllDiscarded();
+  }
 }

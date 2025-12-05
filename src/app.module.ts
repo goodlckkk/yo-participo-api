@@ -37,7 +37,7 @@ import { SuccessStory } from './success-stories/entities/success-story.entity';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [{
         ttl: parseInt(config.get('THROTTLE_TTL') || '60', 10) * 1000, // 60 segundos
-        limit: parseInt(config.get('THROTTLE_LIMIT') || '10', 10), // 10 requests
+        limit: parseInt(config.get('THROTTLE_LIMIT') || '100', 10), // 100 requests por minuto (aumentado para dashboard admin)
       }],
     }),
 
