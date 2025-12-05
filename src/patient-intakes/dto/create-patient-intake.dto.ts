@@ -133,6 +133,10 @@ export class CreatePatientIntakeDto {
   @IsUUID()
   trialId?: string;
 
+  @IsOptional()
+  @IsUUID()
+  referralResearchSiteId?: string;
+
   @IsEnum(PatientIntakeSource)
   @IsOptional() // Source es opcional, por defecto será WEB
   source?: PatientIntakeSource;

@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Trial } from '../../trials/entities/trial.entity';
+import { ResearchSite } from '../../research-sites/entities/research-site.entity';
 
 export enum PatientIntakeStatus {
   RECEIVED = 'RECEIVED',
@@ -183,6 +184,18 @@ export class PatientIntake {
   @ManyToOne(() => Trial, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'trialId' })
   trial: Trial | null;
+
+  /**
+   * Sitio/Institución de referencia (opcional)
+   * Indica qué sitio o institución derivó o refirió al paciente
+   * Ejemplo: Clínica Alemana, Hospital Regional, Clínica Vanguardia, etc.
+   */
+  @Column({ type: 'uuid', nullable: true })
+  referralResearchSiteId: string | null;
+
+  @ManyToOne(() => ResearchSite, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'referralResearchSiteId' })
+  referralResearchSite: ResearchSite | null;
 
   @CreateDateColumn()
   createdAt: Date;
