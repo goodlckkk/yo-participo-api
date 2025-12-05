@@ -147,11 +147,11 @@ export class PatientIntake {
 
   /**
    * Medicamentos actuales estructurados (híbrido: autocomplete + texto libre)
-   * Array de objetos: [{nombre: "Metformina", dosis: "850mg", frecuencia: "2 veces al día"}, ...]
-   * Permite matching preciso y también medicamentos personalizados
+   * Array de strings: ["Metformina", "Enalapril", "Atorvastatina"]
+   * Solo nombres de medicamentos, sin dosis ni frecuencia
    */
   @Column({ type: 'jsonb', nullable: true })
-  medicamentosEstructurados: Array<{ nombre: string; dosis?: string; frecuencia?: string }> | null;
+  medicamentosEstructurados: string[] | null;
 
   @Column({ default: false })
   aceptaTerminos: boolean;
