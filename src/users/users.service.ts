@@ -3,7 +3,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { User, UserRole } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -100,5 +100,12 @@ export class UsersService {
   async remove(id: string) {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
+  }
+
+  async findAdmins() {
+    return this.userRepository.find({
+      where: { role: UserRole.ADMIN },
+      select: ['id', 'email', 'role'],
+    });
   }
 }

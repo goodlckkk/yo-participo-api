@@ -142,7 +142,7 @@ export class TrialsService {
     try {
       console.log(`🗑️ Iniciando eliminación del trial: ${trial.title}`);
       
-      // Primero, desvincular todos los pacientes de este trial (SET NULL)
+      // 1. Desvincular todos los pacientes de este trial (SET NULL)
       const updateResult = await this.patientIntakeRepository
         .createQueryBuilder()
         .update(PatientIntake)
@@ -152,7 +152,19 @@ export class TrialsService {
       
       console.log(`📝 Pacientes desvinculados: ${updateResult.affected || 0}`);
       
-      // Ahora podemos eliminar el trial de forma segura
+      // 2. Eliminar registros de la tabla participations (si existe)
+      try {
+        await this.trialRepository.query(
+          'DELETE FROM participations WHERE "trialId" = $1',
+          [id]
+        );
+        console.log(`📝 Participaciones eliminadas`);
+      } catch (participationError) {
+        // Si la tabla no existe, continuar
+        console.log(`ℹ️ No hay tabla participations o ya está vacía`);
+      }
+      
+      // 3. Ahora podemos eliminar el trial de forma segura
       await this.trialRepository.delete(id);
       
       console.log(`✅ Trial "${trial.title}" eliminado exitosamente`);
