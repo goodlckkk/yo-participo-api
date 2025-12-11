@@ -33,10 +33,6 @@ phases:
       - echo "Preparando artefactos para despliegue..."
       - echo "Verificando carpeta dist..."
       - ls -la dist/
-      - echo "Limpiando devDependencies..."
-      - npm prune --production
-      - echo "Verificando que dist sigue existiendo..."
-      - ls -la dist/
       - echo "Build finalizado en $(date)"
 
 # Artefactos a guardar después del build
