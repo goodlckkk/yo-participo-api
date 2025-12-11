@@ -44,6 +44,7 @@ artifacts:
     - 'package-lock.json'
     - 'Procfile'
     - '.ebextensions/**/*'
+    - '.npmrc'
 
 # Caché para acelerar builds futuros
 cache:
