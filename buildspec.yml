@@ -38,6 +38,10 @@ phases:
       - echo "Preparando artefactos para despliegue..."
       - echo "Verificando carpeta dist..."
       - ls -la dist/
+      - echo "Verificando contenido de dist/src/..."
+      - ls -la dist/src/ || echo "dist/src/ no existe"
+      - echo "Buscando main.js..."
+      - find dist -name "main.js" -type f
       - echo "Build finalizado en $(date)"
 
 # Artefactos a guardar después del build
