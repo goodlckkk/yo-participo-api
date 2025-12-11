@@ -26,11 +26,6 @@ phases:
       - echo "Compilando aplicación NestJS..."
       - npm run build
       - echo "Build completado exitosamente"
-      - echo "Verificando que dist/ fue creado..."
-      - ls -la
-      - ls -la dist/
-      - echo "Contenido de dist/:"
-      - find dist -type f | head -20
 
   # Fase de post-build: preparar artefactos
   post_build:
