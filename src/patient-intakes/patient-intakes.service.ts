@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PatientIntake } from './entities/patient-intake.entity';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
+import { EmailsService } from '../emails/emails.service';
 
 @Injectable()
 export class PatientIntakesService {
+  private readonly logger = new Logger(PatientIntakesService.name);
+
   constructor(
     @InjectRepository(PatientIntake)
     private readonly patientIntakeRepository: Repository<PatientIntake>,
+    private readonly emailsService: EmailsService,
   ) {}
 
   async create(createPatientIntakeDto: CreatePatientIntakeDto) {
@@ -20,7 +24,17 @@ export class PatientIntakesService {
       cirugiasPrevias: createPatientIntakeDto.cirugiasPrevias ?? null,
     });
 
-    return this.patientIntakeRepository.save(intake);
+    const savedIntake = await this.patientIntakeRepository.save(intake);
+
+    try {
+      const patientName = `${savedIntake.nombres} ${savedIntake.apellidos}`;
+      await this.emailsService.sendPatientConfirmationEmail(savedIntake.email, patientName);
+      this.logger.log(`📧 Correo de confirmación enviado a ${savedIntake.email}`);
+    } catch (error) {
+      this.logger.error(`❌ Error al enviar correo de confirmación: ${error.message}`);
+    }
+
+    return savedIntake;
   }
 
   async findAll() {
