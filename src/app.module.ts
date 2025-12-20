@@ -23,6 +23,7 @@ import { HeroSlidesModule } from './hero-slides/hero-slides.module';
 import { HeroSlide } from './hero-slides/entities/hero-slide.entity';
 import { SuccessStoriesModule } from './success-stories/success-stories.module';
 import { SuccessStory } from './success-stories/entities/success-story.entity';
+import { EmailsModule } from './emails/emails.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { SuccessStory } from './success-stories/entities/success-story.entity';
     Cie10Module,
     HeroSlidesModule,
     SuccessStoriesModule,
+    EmailsModule,
   ],
   controllers: [AppController],
   providers: [
