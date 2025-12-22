@@ -2,16 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
-import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  // Servir archivos estáticos desde la carpeta public
-  app.useStaticAssets(join(__dirname, '..', 'public'), {
-    prefix: '/public/',
-  });
+  const app = await NestFactory.create(AppModule);
 
   // Configurar prefijo global 'api' pero excluir el endpoint raíz para health checks
   app.setGlobalPrefix('api', {
