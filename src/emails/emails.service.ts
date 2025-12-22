@@ -140,7 +140,7 @@ export class EmailsService {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
             <tr>
                 <td align="center" style="padding: 30px 20px;">
-                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
+                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 180px; height: auto; display: block;" />
                 </td>
             </tr>
         </table>
@@ -205,7 +205,7 @@ export class EmailsService {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
             <tr>
                 <td align="center" style="padding: 30px 20px;">
-                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
+                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 180px; height: auto; display: block;" />
                 </td>
             </tr>
         </table>
