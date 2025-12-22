@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as sgMail from '@sendgrid/mail';
+import * as fs from 'fs';
+import * as path from 'path';
 
 /**
  * EmailsService
@@ -78,14 +80,31 @@ export class EmailsService {
   }
 
   /**
-   * Método genérico para enviar correos usando SendGrid
+   * Método privado para enviar correos usando SendGrid con logo embebido
+   * 
+   * @param to - Email del destinatario
+   * @param subject - Asunto del correo
+   * @param html - Contenido HTML del correo
    */
-  private async sendEmail(to: string, subject: string, htmlBody: string): Promise<void> {
+  private async sendEmail(to: string, subject: string, html: string): Promise<void> {
+    // Leer logo y convertir a base64
+    const logoPath = path.join(__dirname, 'logo-2.svg');
+    const logoContent = fs.readFileSync(logoPath, { encoding: 'base64' });
+
     const msg = {
       to,
       from: this.emailFrom,
       subject,
-      html: htmlBody,
+      html,
+      attachments: [
+        {
+          content: logoContent,
+          filename: 'logo.svg',
+          type: 'image/svg+xml',
+          disposition: 'inline',
+          content_id: 'logo_yoparticipo',
+        },
+      ],
     };
 
     await sgMail.send(msg);
@@ -110,7 +129,7 @@ export class EmailsService {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
             <tr>
                 <td align="center" style="padding: 30px 20px;">
-                    <img src="https://elasticbeanstalk-sa-east-1-773182953904.s3.sa-east-1.amazonaws.com/assets/logo-2.svg" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
+                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
                 </td>
             </tr>
         </table>
@@ -175,7 +194,7 @@ export class EmailsService {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
             <tr>
                 <td align="center" style="padding: 30px 20px;">
-                    <img src="https://elasticbeanstalk-sa-east-1-773182953904.s3.sa-east-1.amazonaws.com/assets/logo-2.svg" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
+                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
                 </td>
             </tr>
         </table>
