@@ -94,9 +94,9 @@ export class EmailsService {
       html,
     };
 
-    // Intentar leer logo y adjuntarlo
+    // Intentar leer logo PNG y adjuntarlo
     try {
-      const logoPath = path.join(__dirname, 'logo-2.svg');
+      const logoPath = path.join(__dirname, 'logo-2.png');
       this.logger.debug(`Intentando leer logo desde: ${logoPath}`);
       
       if (fs.existsSync(logoPath)) {
@@ -104,13 +104,13 @@ export class EmailsService {
         msg.attachments = [
           {
             content: logoContent,
-            filename: 'logo.svg',
-            type: 'image/svg+xml',
+            filename: 'logo.png',
+            type: 'image/png',
             disposition: 'inline',
             content_id: 'logo_yoparticipo',
           },
         ];
-        this.logger.debug('✅ Logo adjuntado correctamente');
+        this.logger.debug('✅ Logo PNG adjuntado correctamente');
       } else {
         this.logger.warn(`⚠️ Logo no encontrado en: ${logoPath}. Enviando correo sin logo.`);
       }
