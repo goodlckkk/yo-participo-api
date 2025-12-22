@@ -107,16 +107,13 @@ export class EmailsService {
     <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
         
         <!-- HEADER CON LOGO -->
-        <div style="background-color: #005f73; padding: 30px 20px; text-align: center;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60" style="display: inline-block;">
-                <!-- Icono circular turquesa -->
-                <circle cx="25" cy="30" r="22" fill="#04BFAD" stroke="#A7F2EB" stroke-width="2"/>
-                <text x="25" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffffff" text-anchor="middle">Y</text>
-                <!-- Texto YoParticipo -->
-                <text x="55" y="28" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="start">YoParticipo</text>
-                <text x="55" y="44" font-family="Arial, sans-serif" font-size="10" fill="#A7F2EB" text-anchor="start" letter-spacing="1">estudios clínicos</text>
-            </svg>
-        </div>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
+            <tr>
+                <td align="center" style="padding: 30px 20px;">
+                    <img src="https://elasticbeanstalk-sa-east-1-773182953904.s3.sa-east-1.amazonaws.com/assets/logo-2.svg" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
+                </td>
+            </tr>
+        </table>
 
         <!-- CONTENIDO -->
         <div style="padding: 30px 25px;">
@@ -175,16 +172,13 @@ export class EmailsService {
     <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
         
         <!-- HEADER CON LOGO -->
-        <div style="background-color: #005f73; padding: 30px 20px; text-align: center;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="60" viewBox="0 0 200 60" style="display: inline-block;">
-                <!-- Icono circular turquesa -->
-                <circle cx="25" cy="30" r="22" fill="#04BFAD" stroke="#A7F2EB" stroke-width="2"/>
-                <text x="25" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#ffffff" text-anchor="middle">Y</text>
-                <!-- Texto YoParticipo -->
-                <text x="55" y="28" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#ffffff" text-anchor="start">YoParticipo</text>
-                <text x="55" y="44" font-family="Arial, sans-serif" font-size="10" fill="#A7F2EB" text-anchor="start" letter-spacing="1">estudios clínicos</text>
-            </svg>
-        </div>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
+            <tr>
+                <td align="center" style="padding: 30px 20px;">
+                    <img src="https://elasticbeanstalk-sa-east-1-773182953004.s3.sa-east-1.amazonaws.com/assets/logo-2.svg" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
+                </td>
+            </tr>
+        </table>
 
         <!-- CONTENIDO -->
         <div style="padding: 30px 25px;">
