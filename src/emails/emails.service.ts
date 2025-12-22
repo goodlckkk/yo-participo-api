@@ -108,7 +108,7 @@ export class EmailsService {
         
         <!-- HEADER CON LOGO -->
         <div style="background-color: #005f73; padding: 30px 20px; text-align: center;">
-            <img src="https://yoparticipo.cl/logo-2.svg" alt="YoParticipo Logo" style="max-width: 180px; height: auto; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
+            <img src="https://api.yoparticipo.cl/public/logo-2.svg" alt="YoParticipo Logo" style="max-width: 180px; height: auto; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
         </div>
 
         <!-- CONTENIDO -->
@@ -169,7 +169,7 @@ export class EmailsService {
         
         <!-- HEADER CON LOGO -->
         <div style="background-color: #005f73; padding: 30px 20px; text-align: center;">
-            <img src="https://yoparticipo.cl/logo-2.svg" alt="YoParticipo Logo" style="max-width: 180px; height: auto; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
+            <img src="https://api.yoparticipo.cl/public/logo-2.svg" alt="YoParticipo Logo" style="max-width: 180px; height: auto; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
         </div>
 
         <!-- CONTENIDO -->
