@@ -108,7 +108,7 @@ export class EmailsService {
         
         <!-- HEADER CON LOGO -->
         <div style="background-color: #005f73; padding: 30px 20px; text-align: center;">
-            <img src="https://placehold.co/400x150/ffffff/005f73?text=YoParticipo&font=roboto" alt="YoParticipo Logo" style="max-width: 180px; height: auto; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
+            <img src="https://yoparticipo.cl/logo-2.svg" alt="YoParticipo Logo" style="max-width: 180px; height: auto; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
         </div>
 
         <!-- CONTENIDO -->
@@ -135,7 +135,7 @@ export class EmailsService {
         <!-- FOOTER -->
         <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #888888; border-top: 1px solid #eeeeee;">
             <p>Este es un correo automático, por favor no responder a esta dirección.</p>
-            <p>© 2024 YoParticipo. Todos los derechos reservados.</p>
+            <p>© 2025 YoParticipo. Todos los derechos reservados.</p>
             <p><a href="#" style="color: #0a9396; text-decoration: none;">Política de Privacidad</a></p>
         </div>
     </div>
@@ -169,7 +169,7 @@ export class EmailsService {
         
         <!-- HEADER CON LOGO -->
         <div style="background-color: #005f73; padding: 30px 20px; text-align: center;">
-            <img src="https://placehold.co/400x150/ffffff/005f73?text=YoParticipo&font=roboto" alt="YoParticipo Logo" style="max-width: 180px; height: auto; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
+            <img src="https://yoparticipo.cl/logo-2.svg" alt="YoParticipo Logo" style="max-width: 180px; height: auto; background-color: rgba(255,255,255,0.1); padding: 10px; border-radius: 5px;">
         </div>
 
         <!-- CONTENIDO -->
@@ -198,7 +198,7 @@ export class EmailsService {
         <!-- FOOTER -->
         <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #888888; border-top: 1px solid #eeeeee;">
             <p>¿Tienes dudas? Contáctanos a ${this.emailFrom}</p>
-            <p>© 2024 YoParticipo. Todos los derechos reservados.</p>
+            <p>© 2025 YoParticipo. Todos los derechos reservados.</p>
         </div>
     </div>
 </body>
