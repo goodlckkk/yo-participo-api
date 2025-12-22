@@ -175,7 +175,7 @@ export class EmailsService {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
             <tr>
                 <td align="center" style="padding: 30px 20px;">
-                    <img src="https://elasticbeanstalk-sa-east-1-773182953004.s3.sa-east-1.amazonaws.com/assets/logo-2.svg" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
+                    <img src="https://elasticbeanstalk-sa-east-1-773182953904.s3.sa-east-1.amazonaws.com/assets/logo-2.svg" alt="YoParticipo" style="max-width: 220px; height: auto; display: block;" />
                 </td>
             </tr>
         </table>
