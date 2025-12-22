@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as AWS from 'aws-sdk';
+import * as sgMail from '@sendgrid/mail';
 
 /**
  * EmailsService
  * 
- * Este servicio maneja el envío de correos electrónicos usando AWS SES (Simple Email Service).
+ * Este servicio maneja el envío de correos electrónicos usando SendGrid.
  * 
  * Funcionalidades:
  * - Envío de correo de confirmación cuando un paciente se postula
@@ -13,26 +13,24 @@ import * as AWS from 'aws-sdk';
  * - Plantillas HTML profesionales con diseño responsive
  * 
  * Configuración requerida en variables de entorno:
- * - AWS_REGION: Región de AWS (ej: sa-east-1)
- * - AWS_ACCESS_KEY_ID: Credenciales de AWS (opcional si usas IAM roles en EB)
- * - AWS_SECRET_ACCESS_KEY: Credenciales de AWS (opcional si usas IAM roles en EB)
- * - EMAIL_FROM: Correo remitente verificado en SES (ej: contacto@yoparticipo.cl)
+ * - SENDGRID_API_KEY: API Key de SendGrid
+ * - EMAIL_FROM: Correo remitente verificado en SendGrid (ej: contacto@yoparticipo.cl)
  */
 @Injectable()
 export class EmailsService {
   private readonly logger = new Logger(EmailsService.name);
-  private ses: AWS.SES;
   private emailFrom: string;
 
   constructor(private configService: ConfigService) {
-    // Configurar AWS SES
-    AWS.config.update({
-      region: this.configService.get<string>('AWS_REGION') || 'sa-east-1',
-      accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
-      secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
-    });
+    const apiKey = this.configService.get<string>('SENDGRID_API_KEY');
+    
+    if (!apiKey) {
+      this.logger.warn('⚠️ SENDGRID_API_KEY no configurada. El envío de correos fallará.');
+    } else {
+      sgMail.setApiKey(apiKey);
+      this.logger.log('✅ SendGrid configurado correctamente');
+    }
 
-    this.ses = new AWS.SES({ apiVersion: '2010-12-01' });
     this.emailFrom = this.configService.get<string>('EMAIL_FROM') || 'contacto@yoparticipo.cl';
   }
 
@@ -80,29 +78,17 @@ export class EmailsService {
   }
 
   /**
-   * Método genérico para enviar correos usando AWS SES
+   * Método genérico para enviar correos usando SendGrid
    */
   private async sendEmail(to: string, subject: string, htmlBody: string): Promise<void> {
-    const params: AWS.SES.SendEmailRequest = {
-      Source: this.emailFrom,
-      Destination: {
-        ToAddresses: [to],
-      },
-      Message: {
-        Subject: {
-          Data: subject,
-          Charset: 'UTF-8',
-        },
-        Body: {
-          Html: {
-            Data: htmlBody,
-            Charset: 'UTF-8',
-          },
-        },
-      },
+    const msg = {
+      to,
+      from: this.emailFrom,
+      subject,
+      html: htmlBody,
     };
 
-    await this.ses.sendEmail(params).promise();
+    await sgMail.send(msg);
   }
 
   /**
