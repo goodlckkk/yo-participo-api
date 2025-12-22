@@ -87,25 +87,36 @@ export class EmailsService {
    * @param html - Contenido HTML del correo
    */
   private async sendEmail(to: string, subject: string, html: string): Promise<void> {
-    // Leer logo y convertir a base64
-    const logoPath = path.join(__dirname, 'logo-2.svg');
-    const logoContent = fs.readFileSync(logoPath, { encoding: 'base64' });
-
-    const msg = {
+    const msg: any = {
       to,
       from: this.emailFrom,
       subject,
       html,
-      attachments: [
-        {
-          content: logoContent,
-          filename: 'logo.svg',
-          type: 'image/svg+xml',
-          disposition: 'inline',
-          content_id: 'logo_yoparticipo',
-        },
-      ],
     };
+
+    // Intentar leer logo y adjuntarlo
+    try {
+      const logoPath = path.join(__dirname, 'logo-2.svg');
+      this.logger.debug(`Intentando leer logo desde: ${logoPath}`);
+      
+      if (fs.existsSync(logoPath)) {
+        const logoContent = fs.readFileSync(logoPath, { encoding: 'base64' });
+        msg.attachments = [
+          {
+            content: logoContent,
+            filename: 'logo.svg',
+            type: 'image/svg+xml',
+            disposition: 'inline',
+            content_id: 'logo_yoparticipo',
+          },
+        ];
+        this.logger.debug('✅ Logo adjuntado correctamente');
+      } else {
+        this.logger.warn(`⚠️ Logo no encontrado en: ${logoPath}. Enviando correo sin logo.`);
+      }
+    } catch (error) {
+      this.logger.warn(`⚠️ Error al leer logo: ${error.message}. Enviando correo sin logo.`);
+    }
 
     await sgMail.send(msg);
   }
