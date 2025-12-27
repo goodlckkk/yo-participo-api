@@ -56,6 +56,30 @@ export class EmailsService {
   }
 
   /**
+   * Envía correo cuando una institución completa el formulario de contacto
+   * 
+   * @param institutionData - Datos de la institución
+   */
+  async sendInstitutionContactEmail(institutionData: {
+    nombreInstitucion: string;
+    nombreContacto: string;
+    email: string;
+    telefono: string;
+    mensaje: string;
+  }): Promise<void> {
+    const subject = `Nueva solicitud de institución: ${institutionData.nombreInstitucion}`;
+    const htmlBody = this.getInstitutionContactEmailTemplate(institutionData);
+
+    try {
+      await this.sendEmail('contacto@yoparticipo.cl', subject, htmlBody);
+      this.logger.log(`✅ Correo de contacto de institución enviado a contacto@yoparticipo.cl`);
+    } catch (error) {
+      this.logger.error(`❌ Error al enviar correo de contacto de institución: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * Envía correo cuando se encuentra un match con un ensayo clínico
    * 
    * @param patientEmail - Email del paciente
@@ -237,6 +261,92 @@ export class EmailsService {
         <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #888888; border-top: 1px solid #eeeeee;">
             <p>¿Tienes dudas? Contáctanos a ${this.emailFrom}</p>
             <p>© 2025 YoParticipo. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>
+    `;
+  }
+
+  /**
+   * Template HTML para correo de contacto de institución
+   */
+  private getInstitutionContactEmailTemplate(data: {
+    nombreInstitucion: string;
+    nombreContacto: string;
+    email: string;
+    telefono: string;
+    mensaje: string;
+  }): string {
+    return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Solicitud de Institución</title>
+</head>
+<body style="background-color: #ffffff; font-family: Arial, sans-serif; color: #333333; line-height: 1.6; margin: 0; padding: 0; width: 100%;">
+    <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        
+        <!-- HEADER CON LOGO -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
+            <tr>
+                <td align="center" style="padding: 30px 20px;">
+                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 180px; height: auto; display: block;" />
+                </td>
+            </tr>
+        </table>
+
+        <!-- CONTENIDO -->
+        <div style="padding: 30px 25px;">
+            <h1 style="color: #005f73; font-size: 22px; margin-bottom: 20px; font-weight: 600;">Nueva Solicitud de Institución</h1>
+            
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Se ha recibido una nueva solicitud de contacto desde el formulario de instituciones.</p>
+            
+            <!-- DATOS DE LA INSTITUCIÓN -->
+            <div style="background-color: #f8f9fa; border-left: 4px solid #005f73; padding: 20px; margin: 25px 0; border-radius: 4px;">
+                <h2 style="color: #005f73; font-size: 18px; margin-top: 0; margin-bottom: 15px;">📋 Datos de la Institución</h2>
+                
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 8px 0; color: #666; font-weight: 600; width: 40%;">Institución:</td>
+                        <td style="padding: 8px 0; color: #333;">${data.nombreInstitucion}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #666; font-weight: 600;">Contacto:</td>
+                        <td style="padding: 8px 0; color: #333;">${data.nombreContacto}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #666; font-weight: 600;">Email:</td>
+                        <td style="padding: 8px 0; color: #333;"><a href="mailto:${data.email}" style="color: #005f73; text-decoration: none;">${data.email}</a></td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #666; font-weight: 600;">Teléfono:</td>
+                        <td style="padding: 8px 0; color: #333;">${data.telefono}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- MENSAJE -->
+            <div style="background-color: #fff; border: 1px solid #e0e0e0; padding: 20px; margin: 25px 0; border-radius: 4px;">
+                <h3 style="color: #005f73; font-size: 16px; margin-top: 0; margin-bottom: 10px;">💬 Mensaje:</h3>
+                <p style="color: #555; margin: 0; white-space: pre-wrap;">${data.mensaje}</p>
+            </div>
+
+            <!-- ACCIÓN RECOMENDADA -->
+            <div style="background-color: #e7f6f8; padding: 15px; border-radius: 4px; margin-top: 25px;">
+                <p style="margin: 0; color: #005f73; font-size: 14px;">
+                    <strong>⏰ Acción recomendada:</strong> Responder en menos de 24 horas para mantener el compromiso de servicio.
+                </p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e0e0e0;">
+            <p style="margin: 0; color: #666666; font-size: 12px;">
+                Este correo fue generado automáticamente desde el formulario de contacto de instituciones en <strong>yoparticipo.cl</strong>
+            </p>
         </div>
     </div>
 </body>
