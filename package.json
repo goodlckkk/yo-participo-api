@@ -22,8 +22,7 @@
     "migration:run": "npm run typeorm migration:run -- -d src/config/typeorm.config.ts",
     "migration:revert": "npm run typeorm migration:revert -- -d src/config/typeorm.config.ts",
     "migration:show": "npm run typeorm migration:show -- -d src/config/typeorm.config.ts",
-    "import:cie10": "ts-node -r tsconfig-paths/register scripts/import-cie10.ts",
-    "postinstall": "npm run build"
+    "import:cie10": "ts-node -r tsconfig-paths/register scripts/import-cie10.ts"
   },
   "dependencies": {
     "@nestjs/cli": "^11.0.0",
@@ -50,9 +49,7 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.27",
-    "typescript": "^5.7.3"
-  },
-  "devDependencies": {
+    "typescript": "^5.7.3",
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
     "@nestjs/schematics": "^11.0.0",
@@ -78,6 +75,7 @@
     "tsconfig-paths": "^4.2.0",
     "typescript-eslint": "^8.20.0"
   },
+  "devDependencies": {},
   "jest": {
     "moduleFileExtensions": [
       "js",
