@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, Request } from '@nestjs/common';
 import { PatientIntakesService } from './patient-intakes.service';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -14,8 +14,8 @@ export class PatientIntakesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll() {
-    return this.patientIntakesService.findAll();
+  findAll(@Request() req) {
+    return this.patientIntakesService.findAll(req.user);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -32,8 +32,8 @@ export class PatientIntakesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateData: any) {
-    return this.patientIntakesService.update(id, updateData);
+  update(@Param('id') id: string, @Body() updateData: any, @Request() req) {
+    return this.patientIntakesService.update(id, updateData, req.user);
   }
 
   @UseGuards(AuthGuard('jwt'))

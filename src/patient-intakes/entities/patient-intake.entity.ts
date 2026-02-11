@@ -171,6 +171,9 @@ export class PatientIntake {
   @Column({ default: false })
   aceptaPrivacidad: boolean;
 
+  @Column({ default: false })
+  aceptaAlmacenamiento15Anos: boolean;
+
   @Column({
     type: 'enum',
     enum: PatientIntakeStatus,
