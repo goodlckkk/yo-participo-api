@@ -1,7 +1,7 @@
 version: 0.2
 
 # AWS CodeBuild buildspec para yo-participo-api
-# Este archivo define cómo AWS CodeBuild debe construir y desplegar la aplicación
+# Optimizado para Node 20 y NestJS 11
 
 phases:
   # Fase de instalación: instalar dependencias
@@ -9,14 +9,16 @@ phases:
     runtime-versions:
       nodejs: 20
     commands:
-      - echo "Instalando dependencias..."
-      - npm ci
+      - echo "Iniciando fase de instalación..."
+      - echo "Versión de Node:"
+      - node --version
+      - echo "Instalando dependencias (incluyendo devDependencies para compilar)..."
+      - npm ci --include=dev
 
   # Fase de pre-build: verificar configuración
   pre_build:
     commands:
-      - echo "Verificando versiones..."
-      - node --version
+      - echo "Verificando entorno..."
       - npm --version
       - echo "Pre-build completado"
 
@@ -24,29 +26,31 @@ phases:
   build:
     commands:
       - echo "Compilando aplicación NestJS..."
+      # Usamos el script de build robusto definido en package.json
       - npm run build
-      - echo "Build completado exitosamente"
+      - echo "Verificando generación de dist..."
+      - ls -la dist/
 
-  # Fase de post-build: preparar artefactos
+  # Fase de post-build: preparar artefactos para Elastic Beanstalk
   post_build:
     commands:
       - echo "Preparando artefactos para despliegue..."
-      - echo "Verificando carpeta dist..."
-      - ls -la dist/
-      - echo "Verificando contenido de dist/src/..."
-      - ls -la dist/src/ || echo "dist/src/ no existe"
-      - echo "Buscando main.js..."
-      - find dist -name "main.js" -type f
-      - echo "Creando estructura de artefacto para Elastic Beanstalk..."
+      - echo "Eliminando dependencias de desarrollo para aligerar el paquete..."
+      - npm prune --production
+      - echo "Empaquetando artefacto..."
+      # Elastic Beanstalk espera un ZIP o una carpeta plana.
+      # Aquí copiamos todo lo necesario a la raíz del artefacto.
+      # Nota: No necesitamos mover a 'eb-artifact' si definimos artifacts correctamente.
+      # Sin embargo, para mantener compatibilidad con la estructura anterior:
       - mkdir -p eb-artifact
       - cp -r dist eb-artifact/
       - cp -r node_modules eb-artifact/
       - cp package.json package-lock.json Procfile eb-artifact/
       - cp -r .ebextensions eb-artifact/ 2>/dev/null || echo "No .ebextensions"
+      - cp -r .platform eb-artifact/ 2>/dev/null || echo "No .platform"
       - cp .npmrc eb-artifact/ 2>/dev/null || echo "No .npmrc"
-      - echo "Contenido del artefacto:"
+      - echo "Contenido final del artefacto:"
       - ls -la eb-artifact/
-      - echo "Build finalizado en $(date)"
 
 # Artefactos a guardar después del build
 artifacts:
