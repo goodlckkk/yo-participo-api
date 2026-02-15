@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "node node_modules/@nestjs/cli/bin/nest.js build && node -e \"const fs = require('fs'); const dir = 'dist/emails'; if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true }); fs.copyFileSync('src/emails/logo-2.png', 'dist/emails/logo-2.png')\"",
+    "build": "node node_modules/@nestjs/cli/bin/nest.js build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
