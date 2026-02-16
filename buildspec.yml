@@ -3,27 +3,29 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Current Node version:"
-      - node -v
-      - echo "Downloading Node.js 20..."
-      - curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
-      - yum install -y nodejs
-      - echo "New Node version:"
+      - echo "⚠️ Forzando instalación de Node.js 20..."
+      - npm install -g n
+      - n 20
+      - hash -r
       - node -v
       - npm -v
-      - echo "Installing dependencies..."
+      - echo "Instalando dependencias..."
       - npm ci
+  pre_build:
+    commands:
+      - echo "Verificando entorno..."
+      - node --version
   build:
     commands:
-      - echo Build started on `date`
+      - echo "Compilando aplicación..."
       - npm run build
-      - echo "Checking dist folder..."
-      - ls -R dist/
-      - echo "Moving dist files..."
+      - echo "Verificando compilación..."
+      - ls -la dist/
+      - echo "Moviendo archivos compilados a la raíz (Requisito para EB)..."
       - cp -r dist/* .
   post_build:
     commands:
-      - echo Build completed on `date`
+      - echo "Limpiando dependencias de desarrollo..."
       - rm -rf node_modules
       - npm ci --omit=dev
 artifacts:
