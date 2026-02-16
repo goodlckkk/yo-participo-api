@@ -13,7 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
 import { Trial, TrialStatus } from '../trials/entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
-import { Sponsor } from '../sponsors/entities/sponsor.entity';
+import { Sponsor, SponsorType } from '../sponsors/entities/sponsor.entity';
 
 @Injectable()
 export class StatsService {
@@ -84,7 +84,7 @@ export class StatsService {
     // Estadísticas de sponsors
     const totalSponsors = await this.sponsorRepository.count();
     const activeSponsors = await this.sponsorRepository.count({
-      where: { sponsor_type: 'SPONSOR' },
+      where: { sponsor_type: SponsorType.SPONSOR },
     });
 
     return {
