@@ -1,34 +1,60 @@
 version: 0.2
 
+# AWS CodeBuild buildspec para yo-participo-api
+# Este archivo define cómo AWS CodeBuild debe construir y desplegar la aplicación
+
 phases:
+  # Fase de instalación: instalar dependencias
   install:
+    runtime-versions:
+      nodejs: 20
     commands:
-      - echo "⚠️ Forzando instalación de Node.js 20..."
-      - npm install -g n
-      - n 20
-      - hash -r
-      - node -v
-      - npm -v
       - echo "Instalando dependencias..."
       - npm ci
+
+  # Fase de pre-build: verificar configuración
   pre_build:
     commands:
-      - echo "Verificando entorno..."
+      - echo "Verificando versiones..."
       - node --version
+      - npm --version
+      - echo "Pre-build completado"
+
+  # Fase de build: compilar la aplicación
   build:
     commands:
-      - echo "Compilando aplicación..."
+      - echo "Compilando aplicación NestJS..."
       - npm run build
-      - echo "Verificando compilación..."
-      - ls -la dist/
-      - echo "Moviendo archivos compilados a la raíz (Requisito para EB)..."
-      - cp -r dist/* .
+      - echo "Build completado exitosamente"
+
+  # Fase de post-build: preparar artefactos
   post_build:
     commands:
-      - echo "Limpiando dependencias de desarrollo..."
-      - rm -rf node_modules
-      - npm ci --omit=dev
+      - echo "Preparando artefactos para despliegue..."
+      - echo "Verificando carpeta dist..."
+      - ls -la dist/
+      - echo "Verificando contenido de dist/src/..."
+      - ls -la dist/src/ || echo "dist/src/ no existe"
+      - echo "Buscando main.js..."
+      - find dist -name "main.js" -type f
+      - echo "Creando estructura de artefacto para Elastic Beanstalk..."
+      - mkdir -p eb-artifact
+      - cp -r dist eb-artifact/
+      - cp -r node_modules eb-artifact/
+      - cp package.json package-lock.json Procfile eb-artifact/
+      - cp -r .ebextensions eb-artifact/ 2>/dev/null || echo "No .ebextensions"
+      - cp .npmrc eb-artifact/ 2>/dev/null || echo "No .npmrc"
+      - echo "Contenido del artefacto:"
+      - ls -la eb-artifact/
+      - echo "Build finalizado en $(date)"
+
+# Artefactos a guardar después del build
 artifacts:
+  base-directory: eb-artifact
   files:
     - '**/*'
-  discard-paths: no
+
+# Caché para acelerar builds futuros
+cache:
+  paths:
+    - 'node_modules/**/*'
