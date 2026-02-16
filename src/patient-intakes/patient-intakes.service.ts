@@ -182,9 +182,8 @@ export class PatientIntakesService {
       
       // Información adicional
       status: patient.status,
-      trial: patient.trial?.titulo || 'Sin asignar',
+      trial: patient.trial?.title || 'Sin asignar',
       fechaCreacion: patient.createdAt,
-      fechaActualizacion: patient.updatedAt,
     }));
   }
 
