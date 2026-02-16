@@ -3,21 +3,23 @@ version: 0.2
 phases:
   install:
     commands:
-      - echo "Forcing install of Node.js 20..."
-      - npm install -g n
-      - n 20
-      - hash -r
+      - echo "Current Node version:"
+      - node -v
+      - echo "Downloading Node.js 20..."
+      - curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
+      - yum install -y nodejs
+      - echo "New Node version:"
       - node -v
       - npm -v
-      - echo "Installing project dependencies..."
+      - echo "Installing dependencies..."
       - npm ci
   build:
     commands:
       - echo Build started on `date`
       - npm run build
-      - echo "Verifying build output..."
-      - ls -la dist/
-      - echo "Moving dist files to root..."
+      - echo "Checking dist folder..."
+      - ls -R dist/
+      - echo "Moving dist files..."
       - cp -r dist/* .
   post_build:
     commands:
