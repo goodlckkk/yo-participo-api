@@ -11,9 +11,10 @@ import { StatsController } from './stats.controller';
 import { StatsService } from './stats.service';
 import { Trial } from '../trials/entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
+import { Sponsor } from '../sponsors/entities/sponsor.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Trial, PatientIntake])],
+  imports: [TypeOrmModule.forFeature([Trial, PatientIntake, Sponsor])],
   controllers: [StatsController],
   providers: [StatsService],
   exports: [StatsService],
