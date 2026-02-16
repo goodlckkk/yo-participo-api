@@ -13,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Not, IsNull } from 'typeorm';
 import { Trial, TrialStatus } from '../trials/entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
+import { Sponsor } from '../sponsors/entities/sponsor.entity';
 
 @Injectable()
 export class StatsService {
@@ -21,6 +22,8 @@ export class StatsService {
     private readonly trialRepository: Repository<Trial>,
     @InjectRepository(PatientIntake)
     private readonly patientIntakeRepository: Repository<PatientIntake>,
+    @InjectRepository(Sponsor)
+    private readonly sponsorRepository: Repository<Sponsor>,
   ) {}
 
   /**
@@ -78,10 +81,18 @@ export class StatsService {
       }),
     );
 
+    // Estadísticas de sponsors
+    const totalSponsors = await this.sponsorRepository.count();
+    const activeSponsors = await this.sponsorRepository.count({
+      where: { sponsor_type: 'SPONSOR' },
+    });
+
     return {
       totalTrials,
       totalPatients,
       activeTrials,
+      totalSponsors,
+      activeSponsors,
       trialsByStatus: trialsByStatus.map((item) => ({
         status: item.status,
         count: parseInt(item.count),

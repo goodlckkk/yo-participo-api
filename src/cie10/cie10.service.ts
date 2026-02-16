@@ -22,6 +22,7 @@ export class Cie10Service {
   /**
    * Buscar códigos CIE-10 por texto
    * Busca en código, descripción y términos de búsqueda
+   * Búsqueda insensible a acentos, tildes, diéresis y mayúsculas
    * 
    * @param query - Texto a buscar
    * @param limit - Cantidad máxima de resultados (default: 20)
@@ -33,12 +34,12 @@ export class Cie10Service {
 
     const searchTerm = query.trim();
 
-    // Búsqueda en código, descripción y términos
+    // Búsqueda insensible a acentos usando la extensión unaccent
     const results = await this.cie10Repository
       .createQueryBuilder('cie10')
       .where('cie10.activo = :activo', { activo: true })
       .andWhere(
-        '(LOWER(cie10.codigo) LIKE LOWER(:search) OR LOWER(cie10.descripcion) LIKE LOWER(:search))',
+        '(unaccent(cie10.codigo) ILIKE unaccent(:search) OR unaccent(cie10.descripcion) ILIKE unaccent(:search))',
         { search: `%${searchTerm}%` },
       )
       .orderBy('cie10.codigo', 'ASC')
