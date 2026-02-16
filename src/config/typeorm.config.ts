@@ -21,7 +21,7 @@ export default new DataSource({
   migrations: ['src/migrations/*{.ts,.js}'],
   synchronize: false, // NUNCA true en producción
   logging: process.env.NODE_ENV !== 'production',
-  ssl: process.env.DB_SSL === 'true' ? {
+  ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
   } : false,
 });

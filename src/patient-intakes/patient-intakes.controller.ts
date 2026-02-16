@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { PatientIntakesService } from './patient-intakes.service';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -14,8 +14,8 @@ export class PatientIntakesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll() {
-    return this.patientIntakesService.findAll();
+  findAll(@Query('institutionId') institutionId?: string) {
+    return this.patientIntakesService.findAll(institutionId);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -50,6 +50,22 @@ export class PatientIntakesController {
   @Delete(':id/permanent')
   hardDelete(@Param('id') id: string) {
     return this.patientIntakesService.hardDelete(id);
+  }
+
+  /**
+   * Endpoint para exportar datos de pacientes en formato JSON (para CSV/Excel)
+   * Soporta filtrado por institución
+   */
+  @UseGuards(AuthGuard('jwt'))
+  @Get('export/data')
+  async exportData(@Query('institutionId') institutionId?: string) {
+    const exportData = await this.patientIntakesService.generateExportData(institutionId);
+    return {
+      success: true,
+      data: exportData,
+      total: exportData.length,
+      generatedAt: new Date().toISOString(),
+    };
   }
 
   /**

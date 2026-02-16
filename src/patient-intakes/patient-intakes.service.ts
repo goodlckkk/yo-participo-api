@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PatientIntake } from './entities/patient-intake.entity';
+import { PatientIntake, PatientIntakeSource } from './entities/patient-intake.entity';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { EmailsService } from '../emails/emails.service';
 
@@ -37,8 +37,11 @@ export class PatientIntakesService {
     return savedIntake;
   }
 
-  async findAll() {
+  async findAll(institutionId?: string) {
+    const where = institutionId ? { referralResearchSiteId: institutionId } : {};
+    
     return this.patientIntakeRepository.find({
+      where,
       relations: ['trial', 'referralResearchSite'],
       order: { createdAt: 'DESC' },
     });
@@ -143,5 +146,89 @@ export class PatientIntakesService {
       console.error('❌ Error al eliminar pacientes descartados:', error);
       throw new Error(`Error al eliminar pacientes descartados: ${error.message}`);
     }
+  }
+
+  /**
+   * Genera datos para exportación de pacientes en formato CSV/Excel
+   * Incluye las nuevas columnas solicitadas:
+   * - Origen (source)
+   * - Patologías Prevalentes
+   * - Otras Enfermedades
+   * - Estado Vigencia (calculado: 6 meses desde creación)
+   */
+  async generateExportData(institutionId?: string) {
+    const patients = await this.findAll(institutionId);
+    
+    return patients.map(patient => ({
+      // Datos básicos
+      id: patient.id,
+      nombres: patient.nombres,
+      apellidos: patient.apellidos,
+      rut: patient.rut,
+      email: patient.email,
+      telefono: patient.telefono || `${patient.telefonoCodigoPais || ''} ${patient.telefonoNumero || ''}`.trim(),
+      region: patient.region,
+      comuna: patient.comuna,
+      
+      // Condición principal
+      condicionPrincipal: patient.condicionPrincipal,
+      condicionPrincipalCodigo: patient.condicionPrincipalCodigo || '',
+      
+      // Nuevas columnas solicitadas
+      origen: this.mapSourceToLabel(patient.source),
+      patologiasPrevalentes: this.formatPatologias(patient.patologias),
+      otrasEnfermedades: this.formatOtrasEnfermedades(patient.otrasEnfermedadesEstructuradas, patient.otrasEnfermedades),
+      estadoVigencia: this.calculateEstadoVigencia(patient.createdAt),
+      
+      // Información adicional
+      status: patient.status,
+      trial: patient.trial?.titulo || 'Sin asignar',
+      fechaCreacion: patient.createdAt,
+      fechaActualizacion: patient.updatedAt,
+    }));
+  }
+
+  /**
+   * Mapea el código de origen a un label legible
+   */
+  private mapSourceToLabel(source: PatientIntakeSource): string {
+    const sourceMap = {
+      [PatientIntakeSource.WEB_FORM]: 'Formulario Web',
+      [PatientIntakeSource.MANUAL_ENTRY]: 'Ingreso Manual',
+      [PatientIntakeSource.REFERRAL]: 'Referido',
+      [PatientIntakeSource.OTHER]: 'Otro',
+    };
+    return sourceMap[source] || 'Desconocido';
+  }
+
+  /**
+   * Formatea las patologías prevalentes para exportación
+   */
+  private formatPatologias(patologias: string[] | null): string {
+    if (!patologias || patologias.length === 0) return 'Ninguna';
+    return patologias.join(', ');
+  }
+
+  /**
+   * Formata otras enfermedades (prioriza las estructuradas)
+   */
+  private formatOtrasEnfermedades(
+    enfermedadesEstructuradas: Array<{ codigo: string; nombre: string }> | null,
+    enfermedadesTexto: string | null
+  ): string {
+    if (enfermedadesEstructuradas && enfermedadesEstructuradas.length > 0) {
+      return enfermedadesEstructuradas.map(e => `${e.codigo} - ${e.nombre}`).join(', ');
+    }
+    return enfermedadesTexto || 'Ninguna';
+  }
+
+  /**
+   * Calcula el estado de vigencia (6 meses desde creación)
+   */
+  private calculateEstadoVigencia(createdAt: Date): string {
+    const seisMesesAtras = new Date();
+    seisMesesAtras.setMonth(seisMesesAtras.getMonth() - 6);
+    
+    return createdAt >= seisMesesAtras ? 'Vigente' : 'Caducado';
   }
 }
