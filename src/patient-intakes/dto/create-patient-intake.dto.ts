@@ -10,6 +10,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { IsRut } from '../../common/validators/is-rut.validator';
 import { PatientIntakeSource } from '../entities/patient-intake.entity';
 
 export class CreatePatientIntakeDto {
@@ -21,7 +22,7 @@ export class CreatePatientIntakeDto {
   @IsNotEmpty()
   apellidos: string;
 
-  @IsString()
+  @IsRut()
   @IsNotEmpty()
   rut: string;
 
