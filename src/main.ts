@@ -3,6 +3,9 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 
+console.log('Iniciando servidor... Directorio actual:', __dirname);
+console.log('Archivos en directorio:', require('fs').readdirSync(__dirname));
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
