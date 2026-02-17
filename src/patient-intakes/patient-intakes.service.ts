@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -19,6 +19,17 @@ export class PatientIntakesService {
   ) {}
 
   async create(createPatientIntakeDto: CreatePatientIntakeDto) {
+    // Verificar si ya existe un paciente con el mismo email
+    const existingPatient = await this.patientIntakeRepository.findOne({
+      where: { email: createPatientIntakeDto.email },
+    });
+
+    if (existingPatient) {
+      throw new ConflictException(
+        `Ya existe un paciente registrado con el email: ${createPatientIntakeDto.email}`,
+      );
+    }
+
     const intake = this.patientIntakeRepository.create({
       ...createPatientIntakeDto,
       direccion: createPatientIntakeDto.direccion ?? null,
