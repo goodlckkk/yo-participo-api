@@ -1,60 +1,30 @@
 version: 0.2
 
-# AWS CodeBuild buildspec para yo-participo-api
-# Este archivo define cómo AWS CodeBuild debe construir y desplegar la aplicación
-
 phases:
-  # Fase de instalación: instalar dependencias
   install:
     runtime-versions:
       nodejs: 20
     commands:
-      - echo "Instalando dependencias..."
-      - npm ci
-
-  # Fase de pre-build: verificar configuración
-  pre_build:
-    commands:
-      - echo "Verificando versiones..."
-      - node --version
-      - npm --version
-      - echo "Pre-build completado"
-
-  # Fase de build: compilar la aplicación
+      - npm install
   build:
     commands:
-      - echo "Compilando aplicación NestJS..."
+      - echo "Construyendo la aplicación..."
       - npm run build
-      - echo "Build completado exitosamente"
-
-  # Fase de post-build: preparar artefactos
+      - echo "Verificando contenido de dist..."
+      - ls -R dist/
   post_build:
     commands:
-      - echo "Preparando artefactos para despliegue..."
-      - echo "Verificando carpeta dist..."
-      - ls -la dist/
-      - echo "Verificando contenido de dist/src/..."
-      - ls -la dist/src/ || echo "dist/src/ no existe"
-      - echo "Buscando main.js..."
-      - find dist -name "main.js" -type f
-      - echo "Creando estructura de artefacto para Elastic Beanstalk..."
-      - mkdir -p eb-artifact
-      - cp -r dist eb-artifact/
-      - cp -r node_modules eb-artifact/
-      - cp package.json package-lock.json Procfile eb-artifact/
-      - cp -r .ebextensions eb-artifact/ 2>/dev/null || echo "No .ebextensions"
-      - cp .npmrc eb-artifact/ 2>/dev/null || echo "No .npmrc"
-      - echo "Contenido del artefacto:"
-      - ls -la eb-artifact/
-      - echo "Build finalizado en $(date)"
+      - echo "Empaquetando para Elastic Beanstalk..."
+      - mkdir deployment_package
+      - cp -r dist deployment_package/
+      - cp package.json deployment_package/
+      - cp package-lock.json deployment_package/
+      - cp Procfile deployment_package/
+      - cp -r .platform deployment_package/
+      - echo "Contenido del paquete de despliegue:"
+      - ls -R deployment_package/
 
-# Artefactos a guardar después del build
 artifacts:
-  base-directory: eb-artifact
   files:
     - '**/*'
-
-# Caché para acelerar builds futuros
-cache:
-  paths:
-    - 'node_modules/**/*'
+  base-directory: deployment_package
