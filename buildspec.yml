@@ -37,17 +37,20 @@ phases:
       - ls -la dist/src/ || echo "dist/src/ no existe"
       - echo "Buscando main.js..."
       - find dist -name "main.js" -type f
-      - echo "Copiando archivos adicionales necesarios..."
-      - cp package.json package-lock.json Procfile dist/ 2>/dev/null || echo "Archivos copiados"
-      - cp -r .ebextensions dist/ 2>/dev/null || echo "No .ebextensions"
-      - cp .npmrc dist/ 2>/dev/null || echo "No .npmrc"
-      - echo "Contenido final del artefacto dist/:"
-      - ls -la dist/
+      - echo "Creando estructura de artefacto para Elastic Beanstalk..."
+      - mkdir -p eb-artifact
+      - cp -r dist eb-artifact/
+      - cp -r node_modules eb-artifact/
+      - cp package.json package-lock.json Procfile eb-artifact/
+      - cp -r .ebextensions eb-artifact/ 2>/dev/null || echo "No .ebextensions"
+      - cp .npmrc eb-artifact/ 2>/dev/null || echo "No .npmrc"
+      - echo "Contenido del artefacto:"
+      - ls -la eb-artifact/
       - echo "Build finalizado en $(date)"
 
 # Artefactos a guardar después del build
 artifacts:
-  base-directory: dist
+  base-directory: eb-artifact
   files:
     - '**/*'
 
