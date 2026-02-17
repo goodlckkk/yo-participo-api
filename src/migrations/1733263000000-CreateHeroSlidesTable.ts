@@ -2,10 +2,10 @@ import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 /**
  * Migración: Crear tabla hero_slides
- * 
+ *
  * Esta tabla almacena las imágenes del slider principal (hero) de la página de inicio.
  * Permite gestionar múltiples slides con título, descripción, imagen, orden y estado.
- * 
+ *
  * Características:
  * - UUID como primary key
  * - URL de imagen (obligatorio)

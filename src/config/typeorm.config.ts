@@ -6,7 +6,7 @@ config();
 
 /**
  * Configuración de TypeORM para migraciones
- * 
+ *
  * Este archivo es usado por el CLI de TypeORM para ejecutar migraciones.
  * Las variables de entorno deben estar configuradas en .env o en el sistema.
  */
@@ -21,7 +21,10 @@ export default new DataSource({
   migrations: ['src/migrations/*{.ts,.js}'],
   synchronize: false, // NUNCA true en producción
   logging: process.env.NODE_ENV !== 'production',
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false
-  } : false,
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? {
+          rejectUnauthorized: false,
+        }
+      : false,
 });

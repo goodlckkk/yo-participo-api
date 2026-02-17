@@ -11,6 +11,7 @@ import {
   IsUUID,
 } from 'class-validator';
 import { PatientIntakeSource } from '../entities/patient-intake.entity';
+import { IsRut } from '../../common/validators/is-rut.validator';
 
 export class CreatePatientIntakeDto {
   @IsString()
@@ -21,8 +22,7 @@ export class CreatePatientIntakeDto {
   @IsNotEmpty()
   apellidos: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @IsRut({ message: 'El RUT ingresado no es válido. Debe seguir el formato chileno (ej: 12.345.678-9)' })
   rut: string;
 
   @IsDateString()

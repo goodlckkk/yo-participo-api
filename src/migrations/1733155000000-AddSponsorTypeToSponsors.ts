@@ -2,11 +2,11 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 /**
  * Migración para agregar el campo sponsor_type a la tabla sponsors
- * 
+ *
  * Este campo permite distinguir entre:
  * - SPONSOR: Patrocinador directo del estudio clínico
  * - CRO: Contract Research Organization (Organización de Investigación por Contrato)
- * 
+ *
  * Fecha: 2025-12-02
  * Relacionado con: Feedback - Mejoras en patrocinadores
  */

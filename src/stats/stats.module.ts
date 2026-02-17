@@ -1,6 +1,6 @@
 /**
  * Módulo de Estadísticas
- * 
+ *
  * Proporciona endpoints para obtener estadísticas del sistema.
  * Requiere autenticación JWT.
  */

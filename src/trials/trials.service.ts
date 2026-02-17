@@ -22,7 +22,7 @@ export class TrialsService {
       console.log('📝 Creando trial con datos:', {
         sponsor_id,
         research_site_id,
-        trialData
+        trialData,
       });
 
       const newTrial = this.trialRepository.create({
@@ -36,9 +36,9 @@ export class TrialsService {
       console.log('✅ Trial creado en memoria:', newTrial);
 
       const savedTrial = await this.trialRepository.save(newTrial);
-      
+
       console.log('💾 Trial guardado en BD:', savedTrial);
-      
+
       return savedTrial;
     } catch (error) {
       console.error('❌ Error al crear trial:', error);
@@ -73,12 +73,12 @@ export class TrialsService {
         const patientCount = await this.patientIntakeRepository.count({
           where: { trialId: trial.id },
         });
-        
+
         return {
           ...trial,
           current_participants: patientCount,
         };
-      })
+      }),
     );
 
     const totalPages = Math.ceil(totalItems / limitNumber) || 1;
@@ -99,7 +99,9 @@ export class TrialsService {
     });
 
     if (!trial) {
-      throw new NotFoundException(`Ensayo clínico con ID "${id}" no encontrado.`);
+      throw new NotFoundException(
+        `Ensayo clínico con ID "${id}" no encontrado.`,
+      );
     }
 
     // Contar pacientes inscritos en este ensayo
@@ -126,7 +128,9 @@ export class TrialsService {
     });
 
     if (!trial) {
-      throw new NotFoundException(`Ensayo clínico con ID "${id}" no encontrado.`);
+      throw new NotFoundException(
+        `Ensayo clínico con ID "${id}" no encontrado.`,
+      );
     }
 
     return this.trialRepository.save(trial);
@@ -134,14 +138,14 @@ export class TrialsService {
 
   async remove(id: string): Promise<void> {
     const trial = await this.trialRepository.findOne({ where: { id } });
-    
+
     if (!trial) {
       throw new NotFoundException(`Trial con ID "${id}" no encontrado`);
     }
-    
+
     try {
       console.log(`🗑️ Iniciando eliminación del trial: ${trial.title}`);
-      
+
       // 1. Desvincular todos los pacientes de este trial (SET NULL)
       const updateResult = await this.patientIntakeRepository
         .createQueryBuilder()
@@ -149,24 +153,24 @@ export class TrialsService {
         .set({ trialId: null })
         .where('trialId = :trialId', { trialId: id })
         .execute();
-      
+
       console.log(`📝 Pacientes desvinculados: ${updateResult.affected || 0}`);
-      
+
       // 2. Eliminar registros de la tabla participations (si existe)
       try {
         await this.trialRepository.query(
           'DELETE FROM participations WHERE "trialId" = $1',
-          [id]
+          [id],
         );
         console.log(`📝 Participaciones eliminadas`);
       } catch (participationError) {
         // Si la tabla no existe, continuar
         console.log(`ℹ️ No hay tabla participations o ya está vacía`);
       }
-      
+
       // 3. Ahora podemos eliminar el trial de forma segura
       await this.trialRepository.delete(id);
-      
+
       console.log(`✅ Trial "${trial.title}" eliminado exitosamente`);
     } catch (error) {
       console.error('❌ Error al eliminar trial:', error);

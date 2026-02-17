@@ -5,7 +5,7 @@ import { Cie10Code } from './entities/cie10-code.entity';
 
 /**
  * Servicio para gestionar códigos CIE-10
- * 
+ *
  * Funcionalidades:
  * - Búsqueda por código o descripción
  * - Autocomplete para formularios
@@ -23,7 +23,7 @@ export class Cie10Service {
    * Buscar códigos CIE-10 por texto
    * Busca en código, descripción y términos de búsqueda
    * Búsqueda insensible a acentos, tildes, diéresis y mayúsculas
-   * 
+   *
    * @param query - Texto a buscar
    * @param limit - Cantidad máxima de resultados (default: 20)
    */

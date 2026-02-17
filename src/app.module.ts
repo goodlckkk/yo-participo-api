@@ -36,29 +36,41 @@ import { EmailsModule } from './emails/emails.module';
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => [{
-        ttl: parseInt(config.get('THROTTLE_TTL') || '60', 10) * 1000, // 60 segundos
-        limit: parseInt(config.get('THROTTLE_LIMIT') || '1000', 10), // 1000 requests por minuto (aumentado para dashboard con múltiples peticiones simultáneas y varios usuarios)
-      }],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: parseInt(config.get('THROTTLE_TTL') || '60', 10) * 1000, // 60 segundos
+          limit: parseInt(config.get('THROTTLE_LIMIT') || '1000', 10), // 1000 requests por minuto (aumentado para dashboard con múltiples peticiones simultáneas y varios usuarios)
+        },
+      ],
     }),
 
     // 3. Módulo de TypeORM para la conexión a la base de datos
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService): TypeOrmModuleOptions => ({
-        type: 'postgres',
-        host: config.get<string>('DB_HOST'),
-        port: parseInt(config.get<string>('DB_PORT') ?? '5432', 10),
-        username: config.get<string>('DB_USERNAME'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_DATABASE'),
-        entities: [Sponsor, User, Trial, PatientIntake, ResearchSite, Cie10Code, HeroSlide, SuccessStory],
-        synchronize: false, // SIEMPRE false - usamos migraciones
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      } as TypeOrmModuleOptions),
+      useFactory: (config: ConfigService): TypeOrmModuleOptions =>
+        ({
+          type: 'postgres',
+          host: config.get<string>('DB_HOST'),
+          port: parseInt(config.get<string>('DB_PORT') ?? '5432', 10),
+          username: config.get<string>('DB_USERNAME'),
+          password: config.get<string>('DB_PASSWORD'),
+          database: config.get<string>('DB_DATABASE'),
+          entities: [
+            Sponsor,
+            User,
+            Trial,
+            PatientIntake,
+            ResearchSite,
+            Cie10Code,
+            HeroSlide,
+            SuccessStory,
+          ],
+          synchronize: false, // SIEMPRE false - usamos migraciones
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        }) as TypeOrmModuleOptions,
     }),
 
     TrialsModule,

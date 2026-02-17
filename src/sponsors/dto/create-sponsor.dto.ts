@@ -1,4 +1,10 @@
-import { IsOptional, IsString, IsUrl, MinLength, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUrl,
+  MinLength,
+  IsEnum,
+} from 'class-validator';
 import { SponsorType } from '../entities/sponsor.entity';
 
 export class CreateSponsorDto {

@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { PatientIntakesService } from './patient-intakes.service';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -59,7 +69,8 @@ export class PatientIntakesController {
   @UseGuards(AuthGuard('jwt'))
   @Get('export/data')
   async exportData(@Query('institutionId') institutionId?: string) {
-    const exportData = await this.patientIntakesService.generateExportData(institutionId);
+    const exportData =
+      await this.patientIntakesService.generateExportData(institutionId);
     return {
       success: true,
       data: exportData,

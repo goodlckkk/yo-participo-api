@@ -5,7 +5,6 @@ import { JwtService } from '@nestjs/jwt';
 import { UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
-
 jest.mock('bcrypt', () => ({
   compare: jest.fn(),
 }));
@@ -51,10 +50,15 @@ describe('AuthService', () => {
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     jwtService.sign.mockReturnValue('jwt-token');
 
-    await expect(service.login(loginDto)).resolves.toEqual({ access_token: 'jwt-token' });
+    await expect(service.login(loginDto)).resolves.toEqual({
+      access_token: 'jwt-token',
+    });
 
     expect(usersService.findOneByEmail).toHaveBeenCalledWith(loginDto.email);
-    expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.password);
+    expect(bcrypt.compare).toHaveBeenCalledWith(
+      loginDto.password,
+      mockUser.password,
+    );
     expect(jwtService.sign).toHaveBeenCalledWith({
       sub: mockUser.id,
       email: mockUser.email,
@@ -78,9 +82,14 @@ describe('AuthService', () => {
     usersService.findOneByEmail.mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+    await expect(service.login(loginDto)).rejects.toThrow(
+      UnauthorizedException,
+    );
 
     expect(usersService.findOneByEmail).toHaveBeenCalledWith(loginDto.email);
-    expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, mockUser.password);
+    expect(bcrypt.compare).toHaveBeenCalledWith(
+      loginDto.password,
+      mockUser.password,
+    );
   });
 });

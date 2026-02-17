@@ -10,10 +10,11 @@ import { Trial } from '../trials/entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
 import { CreateResearchSiteDto } from './dto/create-research-site.dto';
 import { UpdateResearchSiteDto } from './dto/update-research-site.dto';
+import { CommunesService } from '../communes/communes.service';
 
 /**
  * Servicio para gestionar instituciones/sitios de investigación
- * 
+ *
  * Funcionalidades:
  * - CRUD completo
  * - Búsqueda por nombre (autocomplete)
@@ -28,6 +29,7 @@ export class ResearchSitesService {
     private readonly trialRepository: Repository<Trial>,
     @InjectRepository(PatientIntake)
     private readonly patientIntakeRepository: Repository<PatientIntake>,
+    private readonly communesService: CommunesService,
   ) {}
 
   /**
@@ -55,16 +57,34 @@ export class ResearchSitesService {
   }
 
   /**
+   * Verificar si un nombre corresponde a una comuna
+   * @private
+   */
+  private async isCommuneName(name: string): Promise<boolean> {
+    return this.communesService.exists(name);
+  }
+
+  /**
    * Obtener todas las instituciones activas con contadores
+   * EXCLUYE las comunas que fueron incorrectamente insertadas como sitios de investigación
    */
   async findAll(): Promise<any[]> {
     const sites = await this.researchSiteRepository.find({
       order: { nombre: 'ASC' },
     });
 
+    // Filtrar sitios que NO son comunas
+    const filteredSites = [];
+    for (const site of sites) {
+      const isCommune = await this.isCommuneName(site.nombre);
+      if (!isCommune) {
+        filteredSites.push(site);
+      }
+    }
+
     // Agregar contadores de estudios y pacientes para cada sitio
     const sitesWithCounts = await Promise.all(
-      sites.map(async (site) => {
+      filteredSites.map(async (site) => {
         // Contar estudios clínicos del sitio
         const trialCount = await this.trialRepository.count({
           where: { researchSite: { id: site.id } },
@@ -80,7 +100,7 @@ export class ResearchSitesService {
           trialCount,
           patientCount,
         };
-      })
+      }),
     );
 
     return sitesWithCounts;
@@ -88,6 +108,7 @@ export class ResearchSitesService {
 
   /**
    * Buscar instituciones por nombre (para autocomplete)
+   * EXCLUYE las comunas que fueron incorrectamente insertadas como sitios de investigación
    * @param query - Texto a buscar en el nombre
    */
   async search(query: string): Promise<ResearchSite[]> {
@@ -95,14 +116,26 @@ export class ResearchSitesService {
       return [];
     }
 
-    return this.researchSiteRepository.find({
+    const sites = await this.researchSiteRepository.find({
       where: {
         nombre: ILike(`%${query}%`),
         activo: true,
       },
       order: { nombre: 'ASC' },
-      take: 10, // Limitar a 10 resultados
+      take: 20, // Tomar más resultados para filtrar
     });
+
+    // Filtrar sitios que NO son comunas
+    const filteredSites = [];
+    for (const site of sites) {
+      const isCommune = await this.isCommuneName(site.nombre);
+      if (!isCommune) {
+        filteredSites.push(site);
+      }
+    }
+
+    // Devolver máximo 10 resultados después del filtrado
+    return filteredSites.slice(0, 10);
   }
 
   /**
@@ -115,9 +148,7 @@ export class ResearchSitesService {
     });
 
     if (!researchSite) {
-      throw new NotFoundException(
-        `Institución con ID "${id}" no encontrada`,
-      );
+      throw new NotFoundException(`Institución con ID "${id}" no encontrada`);
     }
 
     return researchSite;
@@ -166,7 +197,9 @@ export class ResearchSitesService {
     }
 
     try {
-      console.log(`🗑️ Iniciando eliminación de institución: ${researchSite.nombre}`);
+      console.log(
+        `🗑️ Iniciando eliminación de institución: ${researchSite.nombre}`,
+      );
 
       // 1. Desvincular todos los ensayos clínicos de esta institución (SET NULL)
       const trialsUpdated = await this.trialRepository
@@ -186,12 +219,16 @@ export class ResearchSitesService {
         .where('referralResearchSiteId = :siteId', { siteId: id })
         .execute();
 
-      console.log(`📝 Pacientes desvinculados: ${patientsUpdated.affected || 0}`);
+      console.log(
+        `📝 Pacientes desvinculados: ${patientsUpdated.affected || 0}`,
+      );
 
       // 3. Ahora podemos eliminar la institución de forma segura
       await this.researchSiteRepository.delete(id);
 
-      console.log(`✅ Institución "${researchSite.nombre}" eliminada exitosamente`);
+      console.log(
+        `✅ Institución "${researchSite.nombre}" eliminada exitosamente`,
+      );
 
       return {
         message: `Institución "${researchSite.nombre}" eliminada exitosamente`,
