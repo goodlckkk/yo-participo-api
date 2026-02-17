@@ -8,7 +8,7 @@ import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity
 
 /**
  * Módulo para gestionar instituciones/sitios de investigación
- *
+ * 
  * Proporciona:
  * - CRUD completo de instituciones
  * - Búsqueda y autocomplete

@@ -1,15 +1,8 @@
-import {
-  IsString,
-  IsOptional,
-  IsInt,
-  IsBoolean,
-  IsUrl,
-  MaxLength,
-} from 'class-validator';
+import { IsString, IsOptional, IsInt, IsBoolean, IsUrl, MaxLength } from 'class-validator';
 
 /**
  * DTO para crear un slide del hero
- *
+ * 
  * Valida los datos de entrada al crear un nuevo slide.
  * La imagen es obligatoria, el resto de campos son opcionales.
  */

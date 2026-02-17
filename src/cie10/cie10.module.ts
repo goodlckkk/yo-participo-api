@@ -7,7 +7,7 @@ import { Cie10Code } from './entities/cie10-code.entity';
 /**
  * Módulo para gestionar códigos CIE-10
  * (Clasificación Internacional de Enfermedades, 10ª revisión)
- *
+ * 
  * Proporciona:
  * - Búsqueda de códigos por texto
  * - Autocomplete para formularios

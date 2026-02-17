@@ -6,7 +6,10 @@ import { PatientIntake } from './entities/patient-intake.entity';
 import { EmailsModule } from '../emails/emails.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PatientIntake]), EmailsModule],
+  imports: [
+    TypeOrmModule.forFeature([PatientIntake]),
+    EmailsModule,
+  ],
   controllers: [PatientIntakesController],
   providers: [PatientIntakesService],
   exports: [PatientIntakesService],

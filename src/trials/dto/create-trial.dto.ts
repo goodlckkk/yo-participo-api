@@ -1,16 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsObject,
-  IsUUID,
-  IsOptional,
-  IsEnum,
-  IsInt,
-  Min,
-  IsDateString,
-  IsUrl,
-  MaxLength,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsObject, IsUUID, IsOptional, IsEnum, IsInt, Min, IsDateString, IsUrl, MaxLength } from 'class-validator';
 import { TrialStatus } from '../entities/trial.entity';
 
 export class CreateTrialDto {

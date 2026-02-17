@@ -1,19 +1,14 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-  Table,
-  TableForeignKey,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm';
 
 /**
  * Migración para crear tabla de Instituciones/Sitios de Investigación
- *
+ * 
  * CAMBIOS:
  * 1. Crear tabla research_sites con todos los campos
  * 2. Agregar columna research_site_id a trials (relación)
  * 3. Crear foreign key entre trials y research_sites
  * 4. Migrar datos existentes de research_site_name a la nueva tabla
- *
+ * 
  * Fecha: 2025-12-02
  * Relacionado con: Gestión de Instituciones - Evitar duplicados
  */

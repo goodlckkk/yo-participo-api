@@ -16,7 +16,7 @@ export interface TrialSuggestion {
 
 /**
  * Servicio para calcular compatibilidad entre pacientes y ensayos clínicos
- *
+ * 
  * Algoritmo de matching:
  * 1. Solo ensayos en estado RECRUITING
  * 2. Coincidencia de patologías del paciente con criterios de inclusión
@@ -35,13 +35,11 @@ export class TrialMatchingService {
 
   /**
    * Obtiene sugerencias de ensayos para un paciente específico
-   *
+   * 
    * @param patientId - ID del paciente
    * @returns Array de sugerencias ordenadas por score (mayor a menor)
    */
-  async getSuggestionsForPatient(
-    patientId: string,
-  ): Promise<TrialSuggestion[]> {
+  async getSuggestionsForPatient(patientId: string): Promise<TrialSuggestion[]> {
     // 1. Obtener datos del paciente
     const patient = await this.patientIntakeRepository.findOne({
       where: { id: patientId },
@@ -69,35 +67,32 @@ export class TrialMatchingService {
   /**
    * Calcula el score de compatibilidad entre un paciente y un ensayo
    * MEJORADO: Ahora usa códigos CIE-10 para matching preciso
-   *
+   * 
    * @param patient - Datos del paciente
    * @param trial - Datos del ensayo
    * @returns Sugerencia con score y razones
    */
-  private calculateMatch(
-    patient: PatientIntake,
-    trial: Trial,
-  ): TrialSuggestion {
+  private calculateMatch(patient: PatientIntake, trial: Trial): TrialSuggestion {
     let score = 0;
     const reasons: string[] = [];
 
     // Extraer criterios de inclusión del ensayo
-    const inclusionCriteria = trial.inclusion_criteria;
-
+    const inclusionCriteria = trial.inclusion_criteria as InclusionCriteria;
+    
     if (!inclusionCriteria) {
       return { trial, matchScore: 0, matchReasons: [] };
     }
 
     // === MATCHING CON CÓDIGOS CIE-10 (PRIORIDAD ALTA) ===
-
+    
     // 1. Verificar códigos CIE-10 EXCLUIDOS (eliminatorio)
     if (inclusionCriteria.codigos_cie10_excluidos && patient.codigos_cie10) {
-      const hasExcludedCode = patient.codigos_cie10.some((patientCode) =>
-        inclusionCriteria.codigos_cie10_excluidos.some((excludedCode) =>
-          this.matchCie10Code(patientCode, excludedCode),
-        ),
+      const hasExcludedCode = patient.codigos_cie10.some(patientCode =>
+        inclusionCriteria.codigos_cie10_excluidos!.some(excludedCode =>
+          this.matchCie10Code(patientCode, excludedCode)
+        )
       );
-
+      
       if (hasExcludedCode) {
         reasons.push('❌ Paciente tiene código CIE-10 excluido');
         return { trial, matchScore: 0, matchReasons: reasons };
@@ -106,23 +101,20 @@ export class TrialMatchingService {
 
     // 2. Matching de códigos CIE-10 REQUERIDOS (peso: 50 puntos)
     if (inclusionCriteria.codigos_cie10_requeridos && patient.codigos_cie10) {
-      const matchedCodes = patient.codigos_cie10.filter((patientCode) =>
-        inclusionCriteria.codigos_cie10_requeridos.some((requiredCode) =>
-          this.matchCie10Code(patientCode, requiredCode),
-        ),
+      const matchedCodes = patient.codigos_cie10.filter(patientCode =>
+        inclusionCriteria.codigos_cie10_requeridos!.some(requiredCode =>
+          this.matchCie10Code(patientCode, requiredCode)
+        )
       );
 
       if (matchedCodes.length > 0) {
         score += 50;
-        reasons.push(
-          `✓ ${matchedCodes.length} código(s) CIE-10 coinciden: ${matchedCodes.join(', ')}`,
-        );
+        reasons.push(`✓ ${matchedCodes.length} código(s) CIE-10 coinciden: ${matchedCodes.join(', ')}`);
       }
     }
 
     // === MATCHING CON TEXTO LIBRE (LEGACY) ===
-    const trialConditions =
-      this.extractConditionsFromCriteria(inclusionCriteria);
+    const trialConditions = this.extractConditionsFromCriteria(inclusionCriteria);
 
     // 1. Coincidencia de condición principal (peso: 40 puntos)
     if (patient.condicionPrincipal && trialConditions.length > 0) {
@@ -131,9 +123,7 @@ export class TrialMatchingService {
       );
       if (conditionMatch) {
         score += 40;
-        reasons.push(
-          `Condición principal coincide: ${patient.condicionPrincipal}`,
-        );
+        reasons.push(`Condición principal coincide: ${patient.condicionPrincipal}`);
       }
     }
 
@@ -174,7 +164,7 @@ export class TrialMatchingService {
 
   /**
    * Extrae condiciones médicas de los criterios de inclusión
-   *
+   * 
    * @param criteria - Objeto JSON con criterios de inclusión
    * @returns Array de strings con condiciones
    */
@@ -196,10 +186,7 @@ export class TrialMatchingService {
       conditions.push(criteria.diagnosis);
     }
 
-    if (
-      criteria.medicalConditions &&
-      Array.isArray(criteria.medicalConditions)
-    ) {
+    if (criteria.medicalConditions && Array.isArray(criteria.medicalConditions)) {
       conditions.push(...criteria.medicalConditions);
     }
 
@@ -209,7 +196,7 @@ export class TrialMatchingService {
 
   /**
    * Compara dos strings de forma flexible (case-insensitive, partial match)
-   *
+   * 
    * @param text1 - Primer texto
    * @param text2 - Segundo texto
    * @returns true si hay coincidencia
@@ -222,10 +209,7 @@ export class TrialMatchingService {
     if (normalized1 === normalized2) return true;
 
     // Coincidencia parcial (uno contiene al otro)
-    if (
-      normalized1.includes(normalized2) ||
-      normalized2.includes(normalized1)
-    ) {
+    if (normalized1.includes(normalized2) || normalized2.includes(normalized1)) {
       return true;
     }
 
@@ -243,13 +227,13 @@ export class TrialMatchingService {
 
   /**
    * Compara dos códigos CIE-10 considerando jerarquía
-   *
+   * 
    * Ejemplos:
    * - matchCie10Code("E11.9", "E11") => true (E11.9 es subcategoría de E11)
    * - matchCie10Code("E11", "E11.9") => true (E11 incluye todas sus subcategorías)
    * - matchCie10Code("E11.9", "E11.9") => true (exacto)
    * - matchCie10Code("E11.9", "E10") => false (diferentes categorías)
-   *
+   * 
    * @param patientCode - Código CIE-10 del paciente
    * @param criteriaCode - Código CIE-10 del criterio del ensayo
    * @returns true si hay coincidencia

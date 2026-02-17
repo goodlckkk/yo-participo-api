@@ -7,7 +7,7 @@ import { UpdateHeroSlideDto } from './dto/update-hero-slide.dto';
 
 /**
  * Servicio para gestionar los slides del hero
- *
+ * 
  * Proporciona métodos CRUD para administrar las imágenes del slider principal.
  * Incluye funcionalidades para:
  * - Listar slides (todos o solo activos)
@@ -49,11 +49,11 @@ export class HeroSlidesService {
    */
   async findOne(id: string): Promise<HeroSlide> {
     const slide = await this.heroSlideRepository.findOne({ where: { id } });
-
+    
     if (!slide) {
       throw new NotFoundException(`Slide con ID ${id} no encontrado`);
     }
-
+    
     return slide;
   }
 
@@ -68,14 +68,11 @@ export class HeroSlidesService {
   /**
    * Actualizar un slide existente
    */
-  async update(
-    id: string,
-    updateHeroSlideDto: UpdateHeroSlideDto,
-  ): Promise<HeroSlide> {
+  async update(id: string, updateHeroSlideDto: UpdateHeroSlideDto): Promise<HeroSlide> {
     const slide = await this.findOne(id);
-
+    
     Object.assign(slide, updateHeroSlideDto);
-
+    
     return this.heroSlideRepository.save(slide);
   }
 
@@ -93,13 +90,13 @@ export class HeroSlidesService {
    */
   async reorder(slideIds: string[]): Promise<HeroSlide[]> {
     const slides = await this.heroSlideRepository.findByIds(slideIds);
-
+    
     // Actualizar el orden de cada slide
     const updatedSlides = slides.map((slide, index) => {
       slide.order = slideIds.indexOf(slide.id);
       return slide;
     });
-
+    
     return this.heroSlideRepository.save(updatedSlides);
   }
 }

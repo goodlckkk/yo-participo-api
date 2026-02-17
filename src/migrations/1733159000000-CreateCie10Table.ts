@@ -3,13 +3,13 @@ import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm';
 /**
  * Migración para crear tabla de códigos CIE-10
  * (Clasificación Internacional de Enfermedades, 10ª revisión)
- *
+ * 
  * CAMBIOS:
  * 1. Crear tabla cie10_codes con estructura completa
  * 2. Crear índices para optimizar búsquedas
  * 3. La tabla estará vacía inicialmente
  * 4. Se poblará con un script separado que importa el CSV
- *
+ * 
  * Fecha: 2025-12-02
  * Relacionado con: Sistema de clasificación de enfermedades estandarizado
  */
@@ -123,9 +123,7 @@ export class CreateCie10Table1733159000000 implements MigrationInterface {
     );
 
     console.log('✅ Migración: Tabla cie10_codes creada con índices');
-    console.log(
-      'ℹ️  Nota: La tabla está vacía. Ejecutar script de importación para poblarla.',
-    );
+    console.log('ℹ️  Nota: La tabla está vacía. Ejecutar script de importación para poblarla.');
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

@@ -1,6 +1,6 @@
 /**
  * Interfaz para los criterios de inclusión/exclusión de un ensayo clínico
- *
+ * 
  * Estructura mejorada con códigos CIE-10 para matching preciso
  */
 export interface InclusionCriteria {

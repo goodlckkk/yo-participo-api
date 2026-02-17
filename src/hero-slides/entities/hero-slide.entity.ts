@@ -1,17 +1,11 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 /**
  * Entidad HeroSlide
- *
+ * 
  * Representa las imágenes del slider principal (hero) de la página de inicio.
  * Permite gestionar múltiples slides con título, descripción, imagen y orden.
- *
+ * 
  * Características:
  * - Imagen URL (puede ser local o externa)
  * - Título y descripción opcionales

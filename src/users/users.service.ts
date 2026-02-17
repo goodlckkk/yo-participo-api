@@ -1,9 +1,5 @@
 import { CreateUserDto } from './dto/create-user.dto';
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -32,9 +28,7 @@ export class UsersService {
       return await this.userRepository.save(newUser);
     } catch (error) {
       if ((error as { code?: string }).code === '23505') {
-        throw new ConflictException(
-          'Ya existe un usuario con este correo electrónico.',
-        );
+        throw new ConflictException('Ya existe un usuario con este correo electrónico.');
       }
       throw error;
     }
@@ -97,9 +91,7 @@ export class UsersService {
       return await this.userRepository.save(user);
     } catch (error) {
       if ((error as { code?: string }).code === '23505') {
-        throw new ConflictException(
-          'Ya existe un usuario con este correo electrónico.',
-        );
+        throw new ConflictException('Ya existe un usuario con este correo electrónico.');
       }
       throw error;
     }

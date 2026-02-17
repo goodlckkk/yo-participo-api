@@ -16,7 +16,7 @@ import { UpdateResearchSiteDto } from './dto/update-research-site.dto';
 
 /**
  * Controlador para gestionar instituciones/sitios de investigación
- *
+ * 
  * Endpoints:
  * - POST   /research-sites          - Crear institución
  * - GET    /research-sites          - Listar todas
@@ -24,7 +24,7 @@ import { UpdateResearchSiteDto } from './dto/update-research-site.dto';
  * - GET    /research-sites/:id      - Obtener una por ID
  * - PATCH  /research-sites/:id      - Actualizar
  * - DELETE /research-sites/:id      - Eliminar (desactivar)
- *
+ * 
  * Todos los endpoints requieren autenticación JWT
  */
 @Controller('research-sites')

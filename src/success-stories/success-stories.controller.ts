@@ -16,7 +16,7 @@ import { UpdateSuccessStoryDto } from './dto/update-success-story.dto';
 
 /**
  * Controlador para gestionar historias de éxito
- *
+ * 
  * Endpoints:
  * - GET /success-stories/active (público) - Historias activas para el home
  * - GET /success-stories (admin) - Todas las historias
@@ -27,7 +27,9 @@ import { UpdateSuccessStoryDto } from './dto/update-success-story.dto';
  */
 @Controller('success-stories')
 export class SuccessStoriesController {
-  constructor(private readonly successStoriesService: SuccessStoriesService) {}
+  constructor(
+    private readonly successStoriesService: SuccessStoriesService,
+  ) {}
 
   /**
    * Obtener historias activas (endpoint público)

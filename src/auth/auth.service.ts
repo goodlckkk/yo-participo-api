@@ -14,6 +14,7 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
+
     const user = await this.usersService.findOneByEmail(loginDto.email);
 
     console.log('[Auth] Intento de login', {
@@ -22,15 +23,10 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException(
-        'Credenciales incorrectas (usuario no encontrado).',
-      );
+      throw new UnauthorizedException('Credenciales incorrectas (usuario no encontrado).');
     }
 
-    const passwordsMatch = await bcrypt.compare(
-      loginDto.password,
-      user.password,
-    );
+    const passwordsMatch = await bcrypt.compare(loginDto.password, user.password);
 
     console.log('[Auth] Resultado comparación contraseña', {
       email: loginDto.email,
@@ -38,16 +34,12 @@ export class AuthService {
     });
 
     if (!passwordsMatch) {
-      throw new UnauthorizedException(
-        'Credenciales incorrectas (contraseña no coincide).',
-      );
+      throw new UnauthorizedException('Credenciales incorrectas (contraseña no coincide).');
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
     const expiresInSeconds = 15 * 60;
-    const expiresAt = new Date(
-      Date.now() + expiresInSeconds * 1000,
-    ).toISOString();
+    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
 
     return {
       access_token: this.jwtService.sign(payload),
@@ -55,7 +47,7 @@ export class AuthService {
       expires_at: expiresAt,
     };
   }
-
+  
   /**
    * Convierte el formato de tiempo (ej: '15m', '1h', '7d') a milisegundos
    */
@@ -66,16 +58,16 @@ export class AuthService {
       h: 60 * 60 * 1000,
       d: 24 * 60 * 60 * 1000,
     };
-
+    
     const match = time.match(/^(\d+)([smhd])$/);
     if (!match) {
       // Por defecto 15 minutos
       return 15 * 60 * 1000;
     }
-
+    
     const value = parseInt(match[1], 10);
     const unit = match[2];
-
+    
     return value * (units[unit] || units.m);
   }
 }
