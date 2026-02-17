@@ -32,10 +32,8 @@ async function bootstrap() {
       }
 
       // Normalizar origin (quitar barra final si existe)
-      const normalizedOrigin = origin.endsWith('/')
-        ? origin.slice(0, -1)
-        : origin;
-
+      const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+      
       // Verificar si el origin está permitido
       if (allowedOrigins.includes(normalizedOrigin)) {
         callback(null, true);
@@ -61,8 +59,6 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
   console.log(`🚀 Aplicación corriendo en: http://localhost:${port}`);
-  console.log(
-    `🔒 CORS habilitado para: ${process.env.FRONTEND_URL || 'http://localhost:4321'}`,
-  );
+  console.log(`🔒 CORS habilitado para: ${process.env.FRONTEND_URL || 'http://localhost:4321'}`);
 }
 bootstrap();

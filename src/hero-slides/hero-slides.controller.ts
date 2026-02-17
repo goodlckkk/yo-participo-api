@@ -16,7 +16,7 @@ import { UpdateHeroSlideDto } from './dto/update-hero-slide.dto';
 
 /**
  * Controlador para gestionar los slides del hero
- *
+ * 
  * Endpoints:
  * - GET /hero-slides/active (público) - Obtener slides activos para el home
  * - GET /hero-slides (protegido) - Obtener todos los slides (admin)
@@ -71,10 +71,7 @@ export class HeroSlidesController {
    */
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'))
-  update(
-    @Param('id') id: string,
-    @Body() updateHeroSlideDto: UpdateHeroSlideDto,
-  ) {
+  update(@Param('id') id: string, @Body() updateHeroSlideDto: UpdateHeroSlideDto) {
     return this.heroSlidesService.update(id, updateHeroSlideDto);
   }
 

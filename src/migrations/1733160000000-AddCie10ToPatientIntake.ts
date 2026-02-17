@@ -2,14 +2,14 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
  * Migración para agregar campos CIE-10 a PatientIntake
- *
+ * 
  * CAMBIOS:
  * 1. Agregar columna codigos_cie10 (jsonb) - Array de códigos CIE-10
  * 2. Agregar columna otrasEnfermedades (text) - Texto libre para otras condiciones
- *
+ * 
  * Estos campos permiten clasificación estandarizada de enfermedades
  * para mejorar el matching con ensayos clínicos.
- *
+ * 
  * Fecha: 2025-12-02
  * Relacionado con: Sistema CIE-10 para clasificación de enfermedades
  */

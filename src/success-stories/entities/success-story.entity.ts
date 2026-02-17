@@ -8,10 +8,10 @@ import {
 
 /**
  * Entidad SuccessStory - Historias de éxito/testimonios
- *
+ * 
  * Almacena historias inspiradoras de pacientes que participaron en estudios clínicos.
  * Similar al sistema de slides, permite gestionar contenido dinámico desde el dashboard.
- *
+ * 
  * Campos:
  * - imageUrl: URL de la foto del paciente/historia (obligatorio)
  * - patientName: Nombre del paciente (opcional, puede ser anónimo)

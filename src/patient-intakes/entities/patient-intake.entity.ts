@@ -134,6 +134,7 @@ export class PatientIntake {
   @Column({ type: 'text', nullable: true })
   cirugiasPrevias: string | null;
 
+
   /**
    * Códigos CIE-10 de las enfermedades del paciente
    * Array de códigos (ej: ["E11.9", "I10", "E78.5"])
@@ -154,10 +155,7 @@ export class PatientIntake {
    * Usado para matching preciso con ensayos clínicos
    */
   @Column({ type: 'jsonb', nullable: true })
-  otrasEnfermedadesEstructuradas: Array<{
-    codigo: string;
-    nombre: string;
-  }> | null;
+  otrasEnfermedadesEstructuradas: Array<{ codigo: string; nombre: string }> | null;
 
   /**
    * Medicamentos actuales estructurados (híbrido: autocomplete + texto libre)

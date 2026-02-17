@@ -3,14 +3,14 @@ import { Cie10Service } from './cie10.service';
 
 /**
  * Controlador para códigos CIE-10
- *
+ * 
  * Endpoints PÚBLICOS (no requieren autenticación):
  * - GET /cie10/search?q=diabetes&limit=20  - Buscar códigos
  * - GET /cie10/codigo/:codigo              - Obtener código específico
  * - GET /cie10/capitulos                   - Listar capítulos
  * - GET /cie10/capitulo/:rango             - Códigos por capítulo
  * - GET /cie10/stats                       - Estadísticas
- *
+ * 
  * Nota: Los endpoints son públicos porque se usan en el formulario
  * web de pacientes que no requiere autenticación.
  */
@@ -23,7 +23,10 @@ export class Cie10Controller {
    * GET /cie10/search?q=diabetes&limit=20
    */
   @Get('search')
-  async search(@Query('q') query: string, @Query('limit') limit?: string) {
+  async search(
+    @Query('q') query: string,
+    @Query('limit') limit?: string,
+  ) {
     const limitNum = limit ? parseInt(limit, 10) : 20;
     return this.cie10Service.search(query, limitNum);
   }

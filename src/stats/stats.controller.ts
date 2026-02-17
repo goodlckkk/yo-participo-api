@@ -1,8 +1,8 @@
 /**
  * Controlador de Estadísticas
- *
+ * 
  * Endpoint: GET /stats
- *
+ * 
  * Proporciona estadísticas generales del sistema para el dashboard:
  * - Total de ensayos por estado
  * - Total de pacientes postulados

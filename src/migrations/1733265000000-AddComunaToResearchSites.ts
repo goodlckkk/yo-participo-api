@@ -2,10 +2,10 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 /**
  * Migración para agregar campo comuna a research_sites
- *
+ * 
  * CAMBIOS:
  * 1. Agregar columna comuna a research_sites
- *
+ * 
  * Fecha: 2025-12-04
  * Relacionado con: Mejorar información de ubicación de instituciones
  */

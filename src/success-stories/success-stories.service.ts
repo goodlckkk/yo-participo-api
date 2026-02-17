@@ -7,7 +7,7 @@ import { UpdateSuccessStoryDto } from './dto/update-success-story.dto';
 
 /**
  * Servicio para gestionar historias de éxito
- *
+ * 
  * Proporciona métodos CRUD y funcionalidades especiales:
  * - Obtener solo historias activas (para el home público)
  * - Obtener todas las historias (para el dashboard admin)
@@ -114,6 +114,6 @@ export class SuccessStoriesService {
       }),
     );
 
-    return updatedStories.filter((s) => s !== null);
+    return updatedStories.filter((s) => s !== null) as SuccessStory[];
   }
 }

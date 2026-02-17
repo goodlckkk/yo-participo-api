@@ -2,13 +2,13 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 /**
  * Migración para separar el teléfono en código de país + número
- *
+ * 
  * CAMBIOS:
  * 1. Hacer telefono nullable (mantener por compatibilidad)
  * 2. Agregar telefonoCodigoPais (varchar 5)
  * 3. Agregar telefonoNumero (varchar 20)
  * 4. Migrar datos existentes: extraer código país del telefono actual
- *
+ * 
  * Fecha: 2025-12-02
  * Relacionado con: Mejora UX del formulario de pacientes
  */

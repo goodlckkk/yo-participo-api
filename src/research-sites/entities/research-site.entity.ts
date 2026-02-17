@@ -10,10 +10,10 @@ import { Trial } from '../../trials/entities/trial.entity';
 
 /**
  * Entidad que representa una Institución o Sitio de Investigación
- *
+ * 
  * Una institución puede tener múltiples ensayos clínicos.
  * Esto permite estandarizar los nombres de instituciones y evitar duplicados.
- *
+ * 
  * Ejemplos:
  * - Clínica Vanguardia
  * - Hospital Clínico Universidad de Chile

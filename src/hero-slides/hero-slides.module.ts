@@ -6,7 +6,7 @@ import { HeroSlide } from './entities/hero-slide.entity';
 
 /**
  * Módulo para gestionar los slides del hero
- *
+ * 
  * Proporciona endpoints para administrar las imágenes del slider principal
  * de la página de inicio.
  */

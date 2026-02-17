@@ -2,12 +2,12 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
 /**
  * Migración para agregar el campo source a la tabla patient_intakes
- *
+ * 
  * Este campo permite distinguir el origen de la postulación:
  * - WEB: Creado a través del formulario público web
  * - MANUAL: Creado manualmente por un administrador en el dashboard
  * - REFERRAL: Referido por un médico u otra fuente (futuro)
- *
+ * 
  * Fecha: 2025-12-02
  * Relacionado con: Requerimiento - Distinguir pacientes manuales vs web
  */

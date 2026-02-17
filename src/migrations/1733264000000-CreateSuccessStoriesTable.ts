@@ -2,10 +2,10 @@ import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
 /**
  * Migración: Crear tabla success_stories
- *
+ * 
  * Esta tabla almacena historias de éxito de pacientes que participaron en estudios clínicos.
  * Similar al sistema de slides, permite gestionar contenido inspirador dinámico.
- *
+ * 
  * Características:
  * - UUID como primary key
  * - URL de imagen (obligatorio)

@@ -3,9 +3,9 @@ import { EmailsService } from './emails.service';
 
 /**
  * Controlador para el envío de correos electrónicos
- *
+ * 
  * Ruta base: /emails
- *
+ * 
  * Endpoints:
  * - POST /emails/institution-contact: Envía correo cuando una institución completa el formulario de contacto
  */
@@ -15,10 +15,10 @@ export class EmailsController {
 
   /**
    * Endpoint para enviar correo de contacto de institución
-   *
+   * 
    * @param body - Datos del formulario de contacto de la institución
    * @returns Mensaje de confirmación
-   *
+   * 
    * Ejemplo de uso con Postman:
    * POST http://localhost:3000/emails/institution-contact
    * Body (JSON):
@@ -33,8 +33,7 @@ export class EmailsController {
   @Post('institution-contact')
   @HttpCode(HttpStatus.OK)
   async sendInstitutionContact(
-    @Body()
-    body: {
+    @Body() body: {
       nombreInstitucion: string;
       nombreContacto: string;
       email: string;
@@ -43,11 +42,10 @@ export class EmailsController {
     },
   ) {
     await this.emailsService.sendInstitutionContactEmail(body);
-
+    
     return {
       success: true,
-      message:
-        'Correo enviado correctamente. Nos contactaremos contigo en menos de 24 horas.',
+      message: 'Correo enviado correctamente. Nos contactaremos contigo en menos de 24 horas.',
     };
   }
 }

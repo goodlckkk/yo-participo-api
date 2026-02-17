@@ -10,10 +10,10 @@ import {
 
 /**
  * DTO para crear una nueva institución/sitio de investigación
- *
+ * 
  * Campos requeridos:
  * - nombre: Nombre único de la institución
- *
+ * 
  * Campos opcionales:
  * - direccion, ciudad, region, telefono, email, sitio_web, descripcion
  */

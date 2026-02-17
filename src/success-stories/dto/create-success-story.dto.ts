@@ -1,15 +1,8 @@
-import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsInt,
-  IsNotEmpty,
-  MaxLength,
-} from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsInt, IsNotEmpty, MaxLength } from 'class-validator';
 
 /**
  * DTO para crear una historia de éxito
- *
+ * 
  * Validaciones:
  * - imageUrl: Obligatorio, máx 500 caracteres
  * - patientName: Opcional, máx 200 caracteres

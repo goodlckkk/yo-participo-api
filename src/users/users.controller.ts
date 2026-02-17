@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -36,9 +26,7 @@ export class UsersController {
     // Solo permitir si no hay usuarios ADMIN
     const existingAdmins = await this.usersService.findAdmins();
     if (existingAdmins.length > 0) {
-      throw new Error(
-        'Ya existe al menos un administrador. Use el endpoint protegido.',
-      );
+      throw new Error('Ya existe al menos un administrador. Use el endpoint protegido.');
     }
     // Forzar rol ADMIN
     createUserDto.role = UserRole.ADMIN;
