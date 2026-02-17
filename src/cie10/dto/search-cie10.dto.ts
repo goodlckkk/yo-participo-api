@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 
 /**
  * DTO para búsqueda de códigos CIE-10
- * 
+ *
  * Permite buscar por:
  * - Texto en descripción o código
  * - Limitar cantidad de resultados

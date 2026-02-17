@@ -6,14 +6,14 @@ import * as path from 'path';
 
 /**
  * EmailsService
- * 
+ *
  * Este servicio maneja el envío de correos electrónicos usando SendGrid.
- * 
+ *
  * Funcionalidades:
  * - Envío de correo de confirmación cuando un paciente se postula
  * - Envío de correo cuando se encuentra un match con un ensayo clínico
  * - Plantillas HTML profesionales con diseño responsive
- * 
+ *
  * Configuración requerida en variables de entorno:
  * - SENDGRID_API_KEY: API Key de SendGrid
  * - EMAIL_FROM: Correo remitente verificado en SendGrid (ej: contacto@yoparticipo.cl)
@@ -25,39 +25,100 @@ export class EmailsService {
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('SENDGRID_API_KEY');
-    
+
     if (!apiKey) {
-      this.logger.warn('⚠️ SENDGRID_API_KEY no configurada. El envío de correos fallará.');
+      this.logger.warn(
+        '⚠️ SENDGRID_API_KEY no configurada. El envío de correos fallará.',
+      );
     } else {
       sgMail.setApiKey(apiKey);
       this.logger.log('✅ SendGrid configurado correctamente');
     }
 
-    this.emailFrom = this.configService.get<string>('EMAIL_FROM') || 'contacto@yoparticipo.cl';
+    this.emailFrom =
+      this.configService.get<string>('EMAIL_FROM') || 'contacto@yoparticipo.cl';
   }
 
   /**
-   * Envía correo de confirmación cuando un paciente se postula
-   * 
+   * Envía correo de confirmación cuando un paciente se postula (ETAPA 1)
+   *
    * @param patientEmail - Email del paciente
    * @param patientName - Nombre completo del paciente
    */
-  async sendPatientConfirmationEmail(patientEmail: string, patientName: string): Promise<void> {
-    const subject = 'Hemos recibido tu solicitud - YoParticipo';
+  async sendPatientConfirmationEmail(
+    patientEmail: string,
+    patientName: string,
+  ): Promise<void> {
+    const subject = 'Confirmación de Registro - YoParticipo';
     const htmlBody = this.getConfirmationEmailTemplate(patientName);
 
     try {
       await this.sendEmail(patientEmail, subject, htmlBody);
-      this.logger.log(`✅ Correo de confirmación enviado a ${patientEmail}`);
+      this.logger.log(`✅ Correo de confirmación (Etapa 1) enviado a ${patientEmail}`);
     } catch (error) {
-      this.logger.error(`❌ Error al enviar correo de confirmación a ${patientEmail}:`, error);
+      this.logger.error(
+        `❌ Error al enviar correo de confirmación a ${patientEmail}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Envía correo de verificación cuando se validan los antecedentes (ETAPA 2)
+   *
+   * @param patientEmail - Email del paciente
+   * @param patientName - Nombre completo del paciente
+   */
+  async sendVerificationEmail(
+    patientEmail: string,
+    patientName: string,
+  ): Promise<void> {
+    const subject = 'Verificación de Antecedentes Completada - YoParticipo';
+    const htmlBody = this.getVerificationEmailTemplate(patientName);
+
+    try {
+      await this.sendEmail(patientEmail, subject, htmlBody);
+      this.logger.log(`✅ Correo de verificación (Etapa 2) enviado a ${patientEmail}`);
+    } catch (error) {
+      this.logger.error(
+        `❌ Error al enviar correo de verificación a ${patientEmail}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Envía correo cuando se encuentra un ensayo clínico (ETAPA 3)
+   *
+   * @param patientEmail - Email del paciente
+   * @param patientName - Nombre completo del paciente
+   * @param studyDetails - Detalles del estudio clínico encontrado
+   */
+  async sendStudyFoundEmail(
+    patientEmail: string,
+    patientName: string,
+    studyDetails?: string,
+  ): Promise<void> {
+    const subject = '¡Estudio Clínico Encontrado! - YoParticipo';
+    const htmlBody = this.getStudyFoundEmailTemplate(patientName, studyDetails);
+
+    try {
+      await this.sendEmail(patientEmail, subject, htmlBody);
+      this.logger.log(`✅ Correo de estudio encontrado (Etapa 3) enviado a ${patientEmail}`);
+    } catch (error) {
+      this.logger.error(
+        `❌ Error al enviar correo de estudio encontrado a ${patientEmail}:`,
+        error,
+      );
       throw error;
     }
   }
 
   /**
    * Envía correo cuando una institución completa el formulario de contacto
-   * 
+   *
    * @param institutionData - Datos de la institución
    */
   async sendInstitutionContactEmail(institutionData: {
@@ -72,16 +133,20 @@ export class EmailsService {
 
     try {
       await this.sendEmail('contacto@yoparticipo.cl', subject, htmlBody);
-      this.logger.log(`✅ Correo de contacto de institución enviado a contacto@yoparticipo.cl`);
+      this.logger.log(
+        `✅ Correo de contacto de institución enviado a contacto@yoparticipo.cl`,
+      );
     } catch (error) {
-      this.logger.error(`❌ Error al enviar correo de contacto de institución: ${error.message}`);
+      this.logger.error(
+        `❌ Error al enviar correo de contacto de institución: ${error.message}`,
+      );
       throw error;
     }
   }
 
   /**
    * Envía correo cuando se encuentra un match con un ensayo clínico
-   * 
+   *
    * @param patientEmail - Email del paciente
    * @param patientName - Nombre completo del paciente
    * @param dashboardLink - Link al dashboard del paciente (opcional)
@@ -91,26 +156,39 @@ export class EmailsService {
     patientName: string,
     dashboardLink?: string,
   ): Promise<void> {
-    const subject = '¡Buenas noticias! Hemos encontrado una oportunidad - YoParticipo';
-    const htmlBody = this.getMatchFoundEmailTemplate(patientName, dashboardLink);
+    const subject =
+      '¡Buenas noticias! Hemos encontrado una oportunidad - YoParticipo';
+    const htmlBody = this.getMatchFoundEmailTemplate(
+      patientName,
+      dashboardLink,
+    );
 
     try {
       await this.sendEmail(patientEmail, subject, htmlBody);
-      this.logger.log(`✅ Correo de match encontrado enviado a ${patientEmail}`);
+      this.logger.log(
+        `✅ Correo de match encontrado enviado a ${patientEmail}`,
+      );
     } catch (error) {
-      this.logger.error(`❌ Error al enviar correo de match a ${patientEmail}:`, error);
+      this.logger.error(
+        `❌ Error al enviar correo de match a ${patientEmail}:`,
+        error,
+      );
       throw error;
     }
   }
 
   /**
    * Método privado para enviar correos usando SendGrid con logo embebido
-   * 
+   *
    * @param to - Email del destinatario
    * @param subject - Asunto del correo
    * @param html - Contenido HTML del correo
    */
-  private async sendEmail(to: string, subject: string, html: string): Promise<void> {
+  private async sendEmail(
+    to: string,
+    subject: string,
+    html: string,
+  ): Promise<void> {
     const msg: any = {
       to,
       from: this.emailFrom,
@@ -122,7 +200,7 @@ export class EmailsService {
     try {
       const logoPath = path.join(__dirname, 'logo-2.png');
       this.logger.debug(`Intentando leer logo desde: ${logoPath}`);
-      
+
       if (fs.existsSync(logoPath)) {
         const logoContent = fs.readFileSync(logoPath, { encoding: 'base64' });
         msg.attachments = [
@@ -136,17 +214,21 @@ export class EmailsService {
         ];
         this.logger.debug('✅ Logo PNG adjuntado correctamente');
       } else {
-        this.logger.warn(`⚠️ Logo no encontrado en: ${logoPath}. Enviando correo sin logo.`);
+        this.logger.warn(
+          `⚠️ Logo no encontrado en: ${logoPath}. Enviando correo sin logo.`,
+        );
       }
     } catch (error) {
-      this.logger.warn(`⚠️ Error al leer logo: ${error.message}. Enviando correo sin logo.`);
+      this.logger.warn(
+        `⚠️ Error al leer logo: ${error.message}. Enviando correo sin logo.`,
+      );
     }
 
     await sgMail.send(msg);
   }
 
   /**
-   * Plantilla HTML para correo de confirmación de postulación
+   * Plantilla HTML para correo de confirmación de registro (ETAPA 1)
    */
   private getConfirmationEmailTemplate(patientName: string): string {
     return `
@@ -155,7 +237,7 @@ export class EmailsService {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmación de Postulación</title>
+    <title>Confirmación de Registro - YoParticipo</title>
 </head>
 <body style="background-color: #ffffff; font-family: Arial, sans-serif; color: #333333; line-height: 1.6; margin: 0; padding: 0; width: 100%;">
     <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
@@ -171,23 +253,59 @@ export class EmailsService {
 
         <!-- CONTENIDO -->
         <div style="padding: 30px 25px;">
-            <h1 style="color: #005f73; font-size: 22px; margin-bottom: 20px; font-weight: 600;">Hemos recibido tu solicitud</h1>
+            <h1 style="color: #005f73; font-size: 22px; margin-bottom: 20px; font-weight: 600;">Confirmación de Registro</h1>
             
             <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Hola <strong>${patientName}</strong>,</p>
             
-            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Queremos confirmarte que tu postulación ha ingresado correctamente a nuestra base de datos segura.</p>
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Queremos confirmarte que tu registro ha sido recibido correctamente y que la información ingresada ya forma parte de nuestra base de datos segura de participantes.</p>
 
-            <div style="background-color: #e0f7fa; border-left: 4px solid #00bcd4; padding: 15px; margin: 20px 0; border-radius: 4px;">
-                <strong>¿Qué sucede ahora?</strong><br>
-                Nuestro equipo médico revisará tu perfil clínico. No es necesario que realices ninguna acción adicional por el momento.
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">A continuación, te explicamos de forma clara en qué etapa del proceso te encuentras y cuáles son los pasos siguientes:</p>
+
+            <h2 style="color: #005f73; font-size: 18px; margin: 25px 0 15px 0;">📝 Etapas del proceso en Yo Participo</h2>
+
+            <!-- ETAPA 1 -->
+            <div style="background-color: #e8f5e8; border-left: 4px solid #38a169; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">✅ 1. Registro de formulario completado</strong><br>
+                <span style="color: #4a5568;">Hemos recibido exitosamente el formulario con tus datos iniciales y antecedentes de salud.</span>
             </div>
 
-            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Ten la tranquilidad de que nos pondremos en contacto contigo <strong>únicamente si encontramos un ensayo clínico</strong> que se ajuste perfectamente a tu diagnóstico y necesidades.</p>
+            <!-- ETAPA 2 -->
+            <div style="background-color: #e6f7ff; border-left: 4px solid #3182ce; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">🔍 2. Revisión y recopilación de antecedentes médicos (si corresponde)</strong><br>
+                <span style="color: #4a5568;">En caso de ser necesario, uno de nuestros profesionales de salud podría contactarte para solicitar o aclarar información médica adicional, siempre con tu autorización.</span>
+            </div>
+
+            <!-- ETAPA 3 -->
+            <div style="background-color: #faf5ff; border-left: 4px solid #805ad5; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">📍 3. Búsqueda de estudios clínicos disponibles</strong><br>
+                <span style="color: #4a5568;">Nuestro equipo experto evaluará si existen ensayos clínicos activos que se ajusten a tu condición de salud, intereses y que se desarrollen en tu ciudad o en la zona más cercana a tu domicilio.</span>
+            </div>
+
+            <!-- ETAPA 4 -->
+            <div style="background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">📞 4. Invitación formal a participar</strong><br>
+                <span style="color: #4a5568;">Si identificamos un estudio adecuado, nos pondremos en contacto contigo para explicarte en detalle de qué se trata el estudio, resolver tus dudas y preguntarte si deseas participar.<br>La decisión de participar será siempre voluntaria.</span>
+            </div>
+
+            <!-- ETAPA 5 -->
+            <div style="background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">🤝 5. Seguimiento y acompañamiento</strong><br>
+                <span style="color: #4a5568;">En caso de que decidas participar, nuestro equipo realizará un seguimiento y acompañamiento durante el proceso, manteniéndote informado y resguardando en todo momento tu bienestar y confidencialidad.</span>
+            </div>
+
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Es importante que sepas que solo te contactaremos si identificamos una oportunidad real y adecuada para ti. Si no existen estudios compatibles en este momento, no recibirás comunicaciones innecesarias.</p>
             
-            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Agradecemos tu confianza en nosotros para buscar nuevas oportunidades de tratamiento.</p>
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Toda tu información será tratada con estricta confidencialidad y utilizada únicamente para fines relacionados con la evaluación y gestión de oportunidades de participación en estudios clínicos.</p>
+
+            <h2 style="color: #005f73; font-size: 18px; margin: 25px 0 15px 0;">📩 ¿Tienes dudas o necesitas contactarnos?</h2>
+            
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Puedes escribirnos en cualquier momento a:</p>
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;"><strong>contacto@yoparticipo.cl</strong><br>(o al canal de contacto definido por la plataforma)</p>
+
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Agradecemos tu confianza y tu interés en contribuir al avance de la investigación clínica.</p>
             
             <br>
-            <p style="margin-bottom: 15px; color: #888888; font-size: 14px;"><em>Atentamente,<br>El equipo de Gestión de Ensayos Clínicos YoParticipo.</em></p>
+            <p style="margin-bottom: 15px; color: #888888; font-size: 14px;"><em>Atentamente,<br>Equipo de Gestión de Ensayos Clínicos<br>Yo Participo</em></p>
         </div>
 
         <!-- FOOTER -->
@@ -205,7 +323,10 @@ export class EmailsService {
   /**
    * Plantilla HTML para correo de match encontrado
    */
-  private getMatchFoundEmailTemplate(patientName: string, dashboardLink?: string): string {
+  private getMatchFoundEmailTemplate(
+    patientName: string,
+    dashboardLink?: string,
+  ): string {
     const linkButton = dashboardLink
       ? `
         <div style="text-align: center; margin: 30px 0;">
@@ -347,6 +468,197 @@ export class EmailsService {
             <p style="margin: 0; color: #666666; font-size: 12px;">
                 Este correo fue generado automáticamente desde el formulario de contacto de instituciones en <strong>yoparticipo.cl</strong>
             </p>
+        </div>
+    </div>
+</body>
+</html>
+    `;
+  }
+
+  /**
+   * Plantilla HTML para correo de verificación de antecedentes (ETAPA 2)
+   */
+  private getVerificationEmailTemplate(patientName: string): string {
+    return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación Completada - YoParticipo</title>
+</head>
+<body style="background-color: #ffffff; font-family: Arial, sans-serif; color: #333333; line-height: 1.6; margin: 0; padding: 0; width: 100%;">
+    <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        
+        <!-- HEADER CON LOGO -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
+            <tr>
+                <td align="center" style="padding: 30px 20px;">
+                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 180px; height: auto; display: block;" />
+                </td>
+            </tr>
+        </table>
+
+        <!-- CONTENIDO -->
+        <div style="padding: 30px 25px;">
+            <h1 style="color: #005f73; font-size: 22px; margin-bottom: 20px; font-weight: 600;">Verificación de Antecedentes Completada</h1>
+            
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Hola <strong>${patientName}</strong>,</p>
+            
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Te informamos que hemos completado exitosamente la verificación de tus antecedentes médicos. Tu perfil ha sido validado y ahora está listo para la búsqueda de estudios clínicos compatibles.</p>
+
+            <h2 style="color: #005f73; font-size: 18px; margin: 25px 0 15px 0;">📊 Estado Actual del Proceso</h2>
+
+            <!-- ETAPA 1 COMPLETADA -->
+            <div style="background-color: #e8f5e8; border-left: 4px solid #38a169; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">✅ 1. Registro de formulario completado</strong><br>
+                <span style="color: #4a5568;">Formulario recibido y procesado correctamente.</span>
+            </div>
+
+            <!-- ETAPA 2 COMPLETADA -->
+            <div style="background-color: #e6f7ff; border-left: 4px solid #3182ce; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">✅ 2. Revisión y verificación de antecedentes médicos</strong><br>
+                <span style="color: #4a5568;">Antecedentes médicos verificados y validados exitosamente.</span>
+            </div>
+
+            <!-- ETAPA 3 EN PROCESO -->
+            <div style="background-color: #faf5ff; border-left: 4px solid #805ad5; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">🔄 3. Búsqueda de estudios clínicos disponibles</strong><br>
+                <span style="color: #4a5568;">Nuestro equipo está evaluando activamente ensayos clínicos que se ajusten a tu perfil.</span>
+            </div>
+
+            <!-- ETAPA 4 PENDIENTE -->
+            <div style="background-color: #f7fafc; border-left: 4px solid #a0aec0; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">⏳ 4. Invitación formal a participar</strong><br>
+                <span style="color: #4a5568;">Esperando identificación de estudio compatible.</span>
+            </div>
+
+            <!-- ETAPA 5 PENDIENTE -->
+            <div style="background-color: #f7fafc; border-left: 4px solid #a0aec0; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">⏳ 5. Seguimiento y acompañamiento</strong><br>
+                <span style="color: #4a5568;">Disponible una vez que se identifique un estudio adecuado.</span>
+            </div>
+
+            <div style="background-color: #f0fff4; border-left: 4px solid #38a169; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <strong>🎯 Próximo paso:</strong><br>
+                Nuestro sistema está analizando la base de datos de estudios clínicos activos. Te contactaremos únicamente si encontramos una oportunidad que se ajuste perfectamente a tu condición.
+            </div>
+
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">El tiempo de búsqueda puede variar dependiendo de la disponibilidad de estudios en tu área y especialidad médica. Te pedimos paciencia durante este proceso.</p>
+            
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Agradecemos tu paciencia y confianza en nuestro sistema.</p>
+            
+            <br>
+            <p style="margin-bottom: 15px; color: #888888; font-size: 14px;"><em>Atentamente,<br>Equipo de Gestión de Ensayos Clínicos<br>Yo Participo</em></p>
+        </div>
+
+        <!-- FOOTER -->
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #888888; border-top: 1px solid #eeeeee;">
+            <p>Este es un correo automático, por favor no responder a esta dirección.</p>
+            <p>© 2025 YoParticipo. Todos los derechos reservados.</p>
+            <p><a href="#" style="color: #0a9396; text-decoration: none;">Política de Privacidad</a></p>
+        </div>
+    </div>
+</body>
+</html>
+    `;
+  }
+
+  /**
+   * Plantilla HTML para correo de estudio encontrado (ETAPA 3)
+   */
+  private getStudyFoundEmailTemplate(patientName: string, studyDetails?: string): string {
+    const studyInfo = studyDetails || "Nuestro equipo ha identificado un ensayo clínico que coincide con tu perfil médico. Los detalles específicos serán proporcionados por nuestro coordinador clínico durante la entrevista personalizada.";
+    
+    return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Estudio Clínico Encontrado! - YoParticipo</title>
+</head>
+<body style="background-color: #ffffff; font-family: Arial, sans-serif; color: #333333; line-height: 1.6; margin: 0; padding: 0; width: 100%;">
+    <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+        
+        <!-- HEADER CON LOGO -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #005f73;">
+            <tr>
+                <td align="center" style="padding: 30px 20px;">
+                    <img src="cid:logo_yoparticipo" alt="YoParticipo" style="max-width: 180px; height: auto; display: block;" />
+                </td>
+            </tr>
+        </table>
+
+        <!-- CONTENIDO -->
+        <div style="padding: 30px 25px;">
+            <h1 style="color: #005f73; font-size: 22px; margin-bottom: 20px; font-weight: 600;">¡Excelentes Noticias!</h1>
+            
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Hola <strong>${patientName}</strong>,</p>
+            
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Tenemos el agrado de informarte que hemos encontrado un <strong>ensayo clínico activo</strong> que se ajusta a tu perfil médico.</p>
+
+            <h2 style="color: #005f73; font-size: 18px; margin: 25px 0 15px 0;">🎯 Progreso del Proceso</h2>
+
+            <!-- ETAPA 1 COMPLETADA -->
+            <div style="background-color: #e8f5e8; border-left: 4px solid #38a169; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">✅ 1. Registro de formulario completado</strong><br>
+                <span style="color: #4a5568;">Formulario recibido y procesado correctamente.</span>
+            </div>
+
+            <!-- ETAPA 2 COMPLETADA -->
+            <div style="background-color: #e6f7ff; border-left: 4px solid #3182ce; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">✅ 2. Revisión y verificación de antecedentes médicos</strong><br>
+                <span style="color: #4a5568;">Antecedentes médicos verificados y validados.</span>
+            </div>
+
+            <!-- ETAPA 3 COMPLETADA -->
+            <div style="background-color: #faf5ff; border-left: 4px solid #805ad5; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">✅ 3. Búsqueda de estudios clínicos disponibles</strong><br>
+                <span style="color: #4a5568;">¡Estudio clínico compatible identificado!</span>
+            </div>
+
+            <!-- ETAPA 4 EN PROCESO -->
+            <div style="background-color: #fff5f5; border-left: 4px solid #e53e3e; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">📞 4. Invitación formal a participar</strong><br>
+                <span style="color: #4a5568;">Un coordinador clínico se contactará contigo para explicarte los detalles.</span>
+            </div>
+
+            <!-- ETAPA 5 PENDIENTE -->
+            <div style="background-color: #f7fafc; border-left: 4px solid #a0aec0; padding: 15px; margin: 15px 0; border-radius: 4px;">
+                <strong style="color: #2d3748;">⏳ 5. Seguimiento y acompañamiento</strong><br>
+                <span style="color: #4a5568;">Disponible una vez confirmada tu participación.</span>
+            </div>
+
+            <div style="background-color: #fffaf0; border-left: 4px solid #dd6b20; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <strong>📋 Información del Estudio:</strong><br>
+                ${studyInfo}
+            </div>
+
+            <div style="background-color: #e6fffa; border-left: 4px solid #319795; padding: 15px; margin: 20px 0; border-radius: 4px;">
+                <strong>📞 Próximos pasos:</strong><br>
+                Un coordinador clínico de nuestro equipo se pondrá en contacto contigo dentro de las próximas <strong>48 horas hábiles</strong> para:
+                <ul style="margin: 10px 0 0 20px; color: #4a5568;">
+                    <li>Explicarte detalladamente el estudio clínico</li>
+                    <li>Resolver todas tus dudas e inquietudes</li>
+                    <li>Informarte sobre los requisitos y procedimientos</li>
+                    <li>Coordinar una visita al centro médico si corresponde</li>
+                </ul>
+            </div>
+
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;"><strong>💡 Importante:</strong> La participación en cualquier estudio clínico es completamente voluntaria. Podrás decidir libremente si deseas participar después de recibir toda la información.</p>
+            
+            <p style="margin-bottom: 15px; color: #555555; font-size: 16px;">Estamos muy contentos de poder ofrecerte esta oportunidad y esperamos que esta posibilidad represente una alternativa beneficiosa para tu salud.</p>
+            
+            <br>
+            <p style="margin-bottom: 15px; color: #888888; font-size: 14px;"><em>Atentamente,<br>Equipo de Gestión de Ensayos Clínicos<br>Yo Participo</em></p>
+        </div>
+
+        <!-- FOOTER -->
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #888888; border-top: 1px solid #eeeeee;">
+            <p>Este es un correo automático, por favor no responder a esta dirección.</p>
+            <p>© 2025 YoParticipo. Todos los derechos reservados.</p>
+            <p><a href="#" style="color: #0a9396; text-decoration: none;">Política de Privacidad</a></p>
         </div>
     </div>
 </body>

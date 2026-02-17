@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PatientIntake, PatientIntakeSource } from './entities/patient-intake.entity';
+import {
+  PatientIntake,
+  PatientIntakeSource,
+} from './entities/patient-intake.entity';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { EmailsService } from '../emails/emails.service';
 
@@ -28,18 +31,27 @@ export class PatientIntakesService {
 
     try {
       const patientName = `${savedIntake.nombres} ${savedIntake.apellidos}`;
-      await this.emailsService.sendPatientConfirmationEmail(savedIntake.email, patientName);
-      this.logger.log(`📧 Correo de confirmación enviado a ${savedIntake.email}`);
+      await this.emailsService.sendPatientConfirmationEmail(
+        savedIntake.email,
+        patientName,
+      );
+      this.logger.log(
+        `📧 Correo de confirmación enviado a ${savedIntake.email}`,
+      );
     } catch (error) {
-      this.logger.error(`❌ Error al enviar correo de confirmación: ${error.message}`);
+      this.logger.error(
+        `❌ Error al enviar correo de confirmación: ${error.message}`,
+      );
     }
 
     return savedIntake;
   }
 
   async findAll(institutionId?: string) {
-    const where = institutionId ? { referralResearchSiteId: institutionId } : {};
-    
+    const where = institutionId
+      ? { referralResearchSiteId: institutionId }
+      : {};
+
     return this.patientIntakeRepository.find({
       where,
       relations: ['trial', 'referralResearchSite'],
@@ -54,7 +66,9 @@ export class PatientIntakesService {
     });
 
     if (!intake) {
-      throw new NotFoundException(`Solicitud de paciente con ID "${id}" no encontrada.`);
+      throw new NotFoundException(
+        `Solicitud de paciente con ID "${id}" no encontrada.`,
+      );
     }
 
     return intake;
@@ -72,10 +86,10 @@ export class PatientIntakesService {
    */
   async update(id: string, updateData: Partial<PatientIntake>) {
     const intake = await this.findOne(id);
-    
+
     // Actualizar los campos proporcionados
     Object.assign(intake, updateData);
-    
+
     return this.patientIntakeRepository.save(intake);
   }
 
@@ -86,15 +100,15 @@ export class PatientIntakesService {
    */
   async remove(id: string) {
     const intake = await this.findOne(id);
-    
+
     // Soft delete: cambiar estado a DISCARDED en lugar de eliminar
     intake.status = 'DISCARDED' as any;
-    
+
     await this.patientIntakeRepository.save(intake);
-    
-    return { 
+
+    return {
       message: 'Paciente marcado como descartado exitosamente',
-      status: 'DISCARDED'
+      status: 'DISCARDED',
     };
   }
 
@@ -104,18 +118,22 @@ export class PatientIntakesService {
    * Solo debe usarse para limpiar datos de prueba o por solicitud explícita
    */
   async hardDelete(id: string): Promise<void> {
-    const intake = await this.patientIntakeRepository.findOne({ where: { id } });
-    
+    const intake = await this.patientIntakeRepository.findOne({
+      where: { id },
+    });
+
     if (!intake) {
       throw new NotFoundException(`Paciente con ID "${id}" no encontrado`);
     }
-    
+
     try {
-      console.log(`🗑️ HARD DELETE: Eliminando permanentemente paciente ${intake.nombres} ${intake.apellidos} (${intake.rut})`);
-      
+      console.log(
+        `🗑️ HARD DELETE: Eliminando permanentemente paciente ${intake.nombres} ${intake.apellidos} (${intake.rut})`,
+      );
+
       // Eliminación física permanente de la base de datos
       await this.patientIntakeRepository.delete(id);
-      
+
       console.log(`✅ Paciente eliminado permanentemente de la base de datos`);
     } catch (error) {
       console.error('❌ Error al eliminar permanentemente el paciente:', error);
@@ -130,21 +148,27 @@ export class PatientIntakesService {
    */
   async hardDeleteAllDiscarded(): Promise<{ deleted: number }> {
     try {
-      console.log(`🗑️ HARD DELETE: Eliminando todos los pacientes descartados...`);
-      
+      console.log(
+        `🗑️ HARD DELETE: Eliminando todos los pacientes descartados...`,
+      );
+
       const result = await this.patientIntakeRepository
         .createQueryBuilder()
         .delete()
         .from(PatientIntake)
         .where('status = :status', { status: 'DISCARDED' })
         .execute();
-      
-      console.log(`✅ ${result.affected || 0} pacientes descartados eliminados permanentemente`);
-      
+
+      console.log(
+        `✅ ${result.affected || 0} pacientes descartados eliminados permanentemente`,
+      );
+
       return { deleted: result.affected || 0 };
     } catch (error) {
       console.error('❌ Error al eliminar pacientes descartados:', error);
-      throw new Error(`Error al eliminar pacientes descartados: ${error.message}`);
+      throw new Error(
+        `Error al eliminar pacientes descartados: ${error.message}`,
+      );
     }
   }
 
@@ -158,28 +182,33 @@ export class PatientIntakesService {
    */
   async generateExportData(institutionId?: string) {
     const patients = await this.findAll(institutionId);
-    
-    return patients.map(patient => ({
+
+    return patients.map((patient) => ({
       // Datos básicos
       id: patient.id,
       nombres: patient.nombres,
       apellidos: patient.apellidos,
       rut: patient.rut,
       email: patient.email,
-      telefono: patient.telefono || `${patient.telefonoCodigoPais || ''} ${patient.telefonoNumero || ''}`.trim(),
+      telefono:
+        patient.telefono ||
+        `${patient.telefonoCodigoPais || ''} ${patient.telefonoNumero || ''}`.trim(),
       region: patient.region,
       comuna: patient.comuna,
-      
+
       // Condición principal
       condicionPrincipal: patient.condicionPrincipal,
       condicionPrincipalCodigo: patient.condicionPrincipalCodigo || '',
-      
+
       // Nuevas columnas solicitadas
       origen: this.mapSourceToLabel(patient.source),
       patologiasPrevalentes: this.formatPatologias(patient.patologias),
-      otrasEnfermedades: this.formatOtrasEnfermedades(patient.otrasEnfermedadesEstructuradas, patient.otrasEnfermedades),
+      otrasEnfermedades: this.formatOtrasEnfermedades(
+        patient.otrasEnfermedadesEstructuradas,
+        patient.otrasEnfermedades,
+      ),
       estadoVigencia: this.calculateEstadoVigencia(patient.createdAt),
-      
+
       // Información adicional
       status: patient.status,
       trial: patient.trial?.title || 'Sin asignar',
@@ -213,10 +242,12 @@ export class PatientIntakesService {
    */
   private formatOtrasEnfermedades(
     enfermedadesEstructuradas: Array<{ codigo: string; nombre: string }> | null,
-    enfermedadesTexto: string | null
+    enfermedadesTexto: string | null,
   ): string {
     if (enfermedadesEstructuradas && enfermedadesEstructuradas.length > 0) {
-      return enfermedadesEstructuradas.map(e => `${e.codigo} - ${e.nombre}`).join(', ');
+      return enfermedadesEstructuradas
+        .map((e) => `${e.codigo} - ${e.nombre}`)
+        .join(', ');
     }
     return enfermedadesTexto || 'Ninguna';
   }
@@ -227,7 +258,7 @@ export class PatientIntakesService {
   private calculateEstadoVigencia(createdAt: Date): string {
     const seisMesesAtras = new Date();
     seisMesesAtras.setMonth(seisMesesAtras.getMonth() - 6);
-    
+
     return createdAt >= seisMesesAtras ? 'Vigente' : 'Caducado';
   }
 }

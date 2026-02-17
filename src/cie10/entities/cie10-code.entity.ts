@@ -9,15 +9,15 @@ import {
 /**
  * Entidad que representa un código CIE-10
  * (Clasificación Internacional de Enfermedades, 10ª revisión)
- * 
+ *
  * La CIE-10 es un sistema de clasificación de enfermedades publicado por la OMS.
  * Contiene aproximadamente 14,000 códigos únicos organizados jerárquicamente.
- * 
+ *
  * Estructura de códigos:
  * - Capítulos: A00-B99, C00-D48, E00-E90, etc.
  * - Categorías: E10, E11, E12 (dentro de E00-E90)
  * - Subcategorías: E11.0, E11.1, E11.9 (dentro de E11)
- * 
+ *
  * Ejemplo:
  * - Código: E11.9
  * - Descripción: "Diabetes mellitus tipo 2 sin mención de complicación"

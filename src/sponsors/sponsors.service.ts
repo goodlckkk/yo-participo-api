@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { Sponsor } from './entities/sponsor.entity';
@@ -19,7 +23,7 @@ export class SponsorsService {
   /**
    * Busca sponsors por nombre (case-insensitive)
    * Útil para autocompletado en el frontend
-   * 
+   *
    * @param query - Texto a buscar en el nombre del sponsor
    * @returns Array de sponsors que coinciden con la búsqueda
    */
@@ -73,7 +77,10 @@ export class SponsorsService {
     return this.sponsorRepository.save(sponsor);
   }
 
-  async update(id: string, updateSponsorDto: UpdateSponsorDto): Promise<Sponsor> {
+  async update(
+    id: string,
+    updateSponsorDto: UpdateSponsorDto,
+  ): Promise<Sponsor> {
     const sponsor = await this.sponsorRepository.preload({
       id,
       ...updateSponsorDto,

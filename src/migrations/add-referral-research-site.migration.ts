@@ -1,6 +1,13 @@
-import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  TableColumn,
+  TableForeignKey,
+} from 'typeorm';
 
-export class AddReferralResearchSite1733432400000 implements MigrationInterface {
+export class AddReferralResearchSite1733432400000
+  implements MigrationInterface
+{
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Verificar si la columna ya existe
     const table = await queryRunner.getTable('patient_intakes');

@@ -6,7 +6,7 @@ import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
  * 2. research_site_url - URL del sitio de investigación
  * 3. research_site_name - Nombre del sitio de investigación
  * 4. Actualizar enum de status para incluir PREPARATION y FOLLOW_UP
- * 
+ *
  * Fecha: 2025-12-02
  * Relacionado con: Feedback - Mejoras en estudios clínicos
  */
@@ -52,21 +52,21 @@ export class AddRecruitmentDeadlineAndResearchSiteToTrials1733154000000
     // 4. Actualizar el ENUM TYPE de PostgreSQL para incluir los nuevos estados
     // IMPORTANTE: PostgreSQL requiere que los nuevos valores de ENUM
     // se agreguen FUERA de una transacción
-    
+
     // Liberar la transacción actual
     await queryRunner.commitTransaction();
-    
+
     // Agregar los nuevos valores al enum (fuera de transacción)
     await queryRunner.query(`
       ALTER TYPE trials_status_enum ADD VALUE IF NOT EXISTS 'PREPARATION';
     `);
-    
+
     await queryRunner.query(`
       ALTER TYPE trials_status_enum ADD VALUE IF NOT EXISTS 'FOLLOW_UP';
     `);
-    
+
     console.log('✅ Valores PREPARATION y FOLLOW_UP agregados al enum');
-    
+
     // Iniciar nueva transacción
     await queryRunner.startTransaction();
   }
@@ -74,16 +74,18 @@ export class AddRecruitmentDeadlineAndResearchSiteToTrials1733154000000
   public async down(queryRunner: QueryRunner): Promise<void> {
     // NOTA: PostgreSQL no permite eliminar valores de un ENUM TYPE si están en uso
     // Por lo tanto, solo revertimos las columnas agregadas
-    
+
     // Eliminar columnas agregadas
     await queryRunner.dropColumn('trials', 'research_site_name');
     await queryRunner.dropColumn('trials', 'research_site_url');
     await queryRunner.dropColumn('trials', 'recruitment_deadline');
-    
+
     // Para revertir completamente el enum, habría que:
     // 1. Cambiar todos los valores FOLLOW_UP y PREPARATION a otros estados
     // 2. Recrear el enum sin esos valores
     // Esto es destructivo, así que lo dejamos como está
-    console.log('⚠️  ADVERTENCIA: Los valores PREPARATION y FOLLOW_UP permanecen en el enum');
+    console.log(
+      '⚠️  ADVERTENCIA: Los valores PREPARATION y FOLLOW_UP permanecen en el enum',
+    );
   }
 }

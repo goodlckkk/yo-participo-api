@@ -1,6 +1,6 @@
 /**
  * Servicio de Estadísticas
- * 
+ *
  * Calcula y proporciona estadísticas del sistema:
  * - Conteo de ensayos por estado
  * - Conteo de pacientes totales
@@ -54,7 +54,10 @@ export class StatsService {
 
     // Ensayos activos (RECRUITING o FOLLOW_UP)
     const activeTrials = await this.trialRepository.count({
-      where: [{ status: TrialStatus.RECRUITING }, { status: TrialStatus.FOLLOW_UP }],
+      where: [
+        { status: TrialStatus.RECRUITING },
+        { status: TrialStatus.FOLLOW_UP },
+      ],
     });
 
     // Ensayos más populares (con más postulaciones)
@@ -115,7 +118,7 @@ export class StatsService {
 
     const trends = await this.patientIntakeRepository
       .createQueryBuilder('intake')
-      .select("DATE(intake.createdAt)", 'date')
+      .select('DATE(intake.createdAt)', 'date')
       .addSelect('COUNT(*)', 'count')
       .where('intake.createdAt >= :thirtyDaysAgo', { thirtyDaysAgo })
       .groupBy('DATE(intake.createdAt)')
@@ -147,7 +150,9 @@ export class StatsService {
     const uniqueSponsors = await this.trialRepository
       .createQueryBuilder('trial')
       .select('COUNT(DISTINCT trial.sponsor_id)', 'count')
-      .where('trial.status IN (:...statuses)', { statuses: [TrialStatus.RECRUITING, TrialStatus.FOLLOW_UP] })
+      .where('trial.status IN (:...statuses)', {
+        statuses: [TrialStatus.RECRUITING, TrialStatus.FOLLOW_UP],
+      })
       .andWhere('trial.sponsor_id IS NOT NULL')
       .getRawOne();
 
