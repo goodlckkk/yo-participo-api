@@ -5,9 +5,10 @@ import { TrialMatchingService } from './trial-matching.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Trial } from './entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
+import { EmailsModule } from '../emails/emails.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Trial, PatientIntake])],
+  imports: [TypeOrmModule.forFeature([Trial, PatientIntake]), EmailsModule],
   controllers: [TrialsController],
   providers: [TrialsService, TrialMatchingService],
 })
