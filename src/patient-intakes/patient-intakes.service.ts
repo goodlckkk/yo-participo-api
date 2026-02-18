@@ -106,7 +106,8 @@ export class PatientIntakesService {
     if (updateData.status && typeof updateData.status === 'string') {
       // Convertir string a enum value
       const statusValue = updateData.status as PatientIntakeStatus;
-      if (Object.values(PatientIntakeStatus).includes(statusValue)) {
+      // Verificar si el valor es válido en el enum
+      if (Object.values(PatientIntakeStatus).some(val => val === statusValue)) {
         updateData.status = statusValue;
       } else {
         throw new Error(`Valor de estado inválido: ${updateData.status}`);
