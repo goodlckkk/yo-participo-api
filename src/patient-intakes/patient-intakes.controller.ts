@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { PatientIntakesService } from './patient-intakes.service';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
@@ -18,14 +19,16 @@ export class PatientIntakesController {
   constructor(private readonly patientIntakesService: PatientIntakesService) {}
 
   @Post()
-  create(@Body() createPatientIntakeDto: CreatePatientIntakeDto) {
-    return this.patientIntakesService.create(createPatientIntakeDto);
+  create(@Body() createPatientIntakeDto: CreatePatientIntakeDto, @Req() req?: any) {
+    const user = req?.user;
+    return this.patientIntakesService.create(createPatientIntakeDto, user);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll(@Query('institutionId') institutionId?: string) {
-    return this.patientIntakesService.findAll(institutionId);
+  findAll(@Query('institutionId') institutionId?: string, @Req() req?: any) {
+    const user = req?.user;
+    return this.patientIntakesService.findAll(institutionId, user);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -68,9 +71,10 @@ export class PatientIntakesController {
    */
   @UseGuards(AuthGuard('jwt'))
   @Get('export/data')
-  async exportData(@Query('institutionId') institutionId?: string) {
+  async exportData(@Query('institutionId') institutionId?: string, @Req() req?: any) {
+    const user = req?.user;
     const exportData =
-      await this.patientIntakesService.generateExportData(institutionId);
+      await this.patientIntakesService.generateExportData(institutionId, user);
     return {
       success: true,
       data: exportData,

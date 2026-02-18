@@ -45,6 +45,9 @@ export class ResearchSite {
   @Column({ type: 'varchar', length: 255, nullable: true })
   email: string | null;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  contactEmail: string | null;
+
   @Column({ type: 'varchar', length: 500, nullable: true })
   sitio_web: string | null;
 

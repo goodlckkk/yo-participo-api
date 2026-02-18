@@ -19,7 +19,7 @@ export class PatientIntakesService {
     private readonly emailsService: EmailsService,
   ) {}
 
-  async create(createPatientIntakeDto: CreatePatientIntakeDto) {
+  async create(createPatientIntakeDto: CreatePatientIntakeDto, user?: any) {
     // Verificar si ya existe un paciente con el mismo email
     const existingPatient = await this.patientIntakeRepository.findOne({
       where: { email: createPatientIntakeDto.email },
@@ -31,8 +31,14 @@ export class PatientIntakesService {
       );
     }
 
+    // Si el usuario es INSTITUTION, forzar el ID de la institución
+    const createData = { ...createPatientIntakeDto };
+    if (user && user.role === 'INSTITUTION' && user.institutionId) {
+      createData.referralResearchSiteId = user.institutionId;
+    }
+
     const intake = this.patientIntakeRepository.create({
-      ...createPatientIntakeDto,
+      ...createData,
       direccion: createPatientIntakeDto.direccion ?? null,
       medicamentosActuales: createPatientIntakeDto.medicamentosActuales ?? null,
       alergias: createPatientIntakeDto.alergias ?? null,
@@ -59,10 +65,17 @@ export class PatientIntakesService {
     return savedIntake;
   }
 
-  async findAll(institutionId?: string) {
-    const where = institutionId
-      ? { referralResearchSiteId: institutionId }
-      : {};
+  async findAll(institutionId?: string, user?: any) {
+    let where: any = {};
+    
+    // Si se proporciona institutionId explícitamente, usarlo
+    if (institutionId) {
+      where.referralResearchSiteId = institutionId;
+    }
+    // Si no se proporciona institutionId pero el usuario es INSTITUTION, filtrar por su institución
+    else if (user && user.role === 'INSTITUTION' && user.institutionId) {
+      where.referralResearchSiteId = user.institutionId;
+    }
 
     return this.patientIntakeRepository.find({
       where,
@@ -298,8 +311,8 @@ export class PatientIntakesService {
    * - Otras Enfermedades
    * - Estado Vigencia (calculado: 6 meses desde creación)
    */
-  async generateExportData(institutionId?: string) {
-    const patients = await this.findAll(institutionId);
+  async generateExportData(institutionId?: string, user?: any) {
+    const patients = await this.findAll(institutionId, user);
 
     return patients.map((patient) => ({
       // Datos básicos

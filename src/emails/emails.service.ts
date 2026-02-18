@@ -398,6 +398,34 @@ export class EmailsService {
   }
 
   /**
+   * Envía un email al administrador cuando una institución solicita un nuevo estudio
+   * @param adminEmail - Email del administrador
+   * @param requestData - Datos de la solicitud del estudio
+   */
+  async sendTrialRequestEmail(
+    adminEmail: string,
+    requestData: {
+      institutionName: string;
+      contactEmail: string;
+      trialTitle: string;
+      trialDescription: string;
+      additionalNotes?: string;
+      requestDate: string;
+    }
+  ): Promise<void> {
+    const subject = `Nueva solicitud de estudio: ${requestData.trialTitle}`;
+    const htmlBody = this.getTrialRequestEmailTemplate(requestData);
+
+    try {
+      await this.sendEmail(adminEmail, subject, htmlBody);
+      this.logger.log(`✅ Correo de solicitud de estudio enviado a ${adminEmail}`);
+    } catch (error) {
+      this.logger.error(`❌ Error al enviar correo de solicitud a ${adminEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Plantilla HTML para correo de paciente verificado
    */
   private getPatientVerifiedEmailTemplate(patientName: string): string {
@@ -502,6 +530,89 @@ export class EmailsService {
         <div style="text-align: center; margin: 30px 0;">
             <p style="font-size: 16px; color: #04bcbc; font-weight: bold;">
                 ¡Felicidades por dar este importante paso!
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+        <p style="margin: 0; font-size: 12px; color: #666;">
+            © 2024 YoParticipo. Todos los derechos reservados.
+        </p>
+    </div>
+</body>
+</html>
+    `;
+  }
+
+  /**
+   * Plantilla HTML para correo de solicitud de estudio desde institución
+   */
+  private getTrialRequestEmailTemplate(requestData: {
+    institutionName: string;
+    contactEmail: string;
+    trialTitle: string;
+    trialDescription: string;
+    additionalNotes?: string;
+    requestDate: string;
+  }): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitud de Nuevo Estudio - YoParticipo</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #04bcbc 0%, #346c84 100%); padding: 30px; text-align: center; color: white;">
+        <h1 style="margin: 0; font-size: 28px;">Nueva Solicitud de Estudio</h1>
+        <p style="margin: 15px 0 0; font-size: 16px; opacity: 0.9;">Una institución ha solicitado crear un nuevo estudio clínico</p>
+    </div>
+    
+    <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 style="color: #04bcbc; margin-top: 0;">Detalles de la Solicitud</h2>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #346c84; margin-top: 0;">${requestData.trialTitle}</h3>
+            <p style="margin: 10px 0; color: #666;">${requestData.trialDescription}</p>
+        </div>
+        
+        <div style="margin: 25px 0;">
+            <h4 style="color: #04bcbc; margin-bottom: 15px;">📋 Información de la Institución</h4>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; width: 120px;">Institución:</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${requestData.institutionName}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Email Contacto:</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${requestData.contactEmail}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; font-weight: bold;">Fecha Solicitud:</td>
+                    <td style="padding: 8px;">${requestData.requestDate}</td>
+                </tr>
+            </table>
+        </div>
+        
+        ${requestData.additionalNotes ? `
+        <div style="background-color: #e8f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="color: #04bcbc; margin-top: 0;">📝 Notas Adicionales</h4>
+            <p style="margin: 0; color: #666;">${requestData.additionalNotes}</p>
+        </div>
+        ` : ''}
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="https://admin.yoparticipo.cl/trials" 
+               style="display: inline-block; background-color: #04bcbc; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">
+               👉 Revisar Solicitud en Dashboard
+            </a>
+        </div>
+        
+        <div style="border-top: 2px solid #04bcbc; padding-top: 20px; margin-top: 30px;">
+            <p style="margin: 0; font-size: 14px; color: #666;">
+                <strong>Acción requerida:</strong> Por favor revisa esta solicitud y contacta a la institución 
+                para coordinar la creación del estudio clínico en el sistema.
             </p>
         </div>
     </div>

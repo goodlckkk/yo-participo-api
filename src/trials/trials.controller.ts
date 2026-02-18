@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query, UseGuards, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TrialsService } from './trials.service';
 import { TrialMatchingService } from './trial-matching.service';
+import { EmailsService } from '../emails/emails.service';
 import { CreateTrialDto } from './dto/create-trial.dto';
 import { UpdateTrialDto } from './dto/update-trial.dto';
+import { CreateTrialRequestDto } from './dto/create-trial-request.dto';
 import { HttpStatus } from '@nestjs/common';
 import { TrialStatus } from './entities/trial.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
@@ -15,6 +17,7 @@ export class TrialsController {
   constructor(
     private readonly trialsService: TrialsService,
     private readonly trialMatchingService: TrialMatchingService,
+    private readonly emailsService: EmailsService,
   ) {}
 
   @Post()
@@ -22,6 +25,40 @@ export class TrialsController {
   @Roles('ADMIN', 'DOCTOR')
   create(@Body() createTrialDto: CreateTrialDto) {
     return this.trialsService.create(createTrialDto);
+  }
+
+  @Post('request')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('INSTITUTION')
+  async requestTrial(@Body() createTrialRequestDto: CreateTrialRequestDto, @Req() req: any) {
+    const user = req.user;
+    
+    try {
+      // Enviar email al administrador con la solicitud
+      await this.emailsService.sendTrialRequestEmail(
+        'admin@yoparticipo.cl', // Email del admin (debería venir de configuración)
+        {
+          institutionName: user.institution?.nombre || 'Institución',
+          contactEmail: user.email,
+          trialTitle: createTrialRequestDto.title,
+          trialDescription: createTrialRequestDto.description,
+          additionalNotes: createTrialRequestDto.additionalNotes,
+          requestDate: new Date().toLocaleDateString('es-CL')
+        }
+      );
+
+      return {
+        success: true,
+        message: 'Solicitud de estudio recibida. El administrador será notificado.',
+        request: createTrialRequestDto
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Error al procesar la solicitud. Por favor, intente nuevamente.',
+        error: error.message
+      };
+    }
   }
 
   @Get()
