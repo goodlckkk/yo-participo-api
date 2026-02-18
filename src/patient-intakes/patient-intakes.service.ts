@@ -72,18 +72,39 @@ export class PatientIntakesService {
   }
 
   async findOne(id: string) {
-    const intake = await this.patientIntakeRepository.findOne({
-      where: { id },
-      relations: ['trial', 'referralResearchSite'],
-    });
+    try {
+      const intake = await this.patientIntakeRepository.findOne({
+        where: { id },
+        relations: ['trial', 'referralResearchSite'],
+      });
 
-    if (!intake) {
-      throw new NotFoundException(
-        `Solicitud de paciente con ID "${id}" no encontrada.`,
-      );
+      if (!intake) {
+        throw new NotFoundException(
+          `Solicitud de paciente con ID "${id}" no encontrada.`,
+        );
+      }
+
+      return intake;
+    } catch (error) {
+      // Si hay error al cargar relaciones, intentar sin relaciones
+      if (error.message?.includes('relation') || error.message?.includes('foreign key')) {
+        this.logger.warn(`⚠️  Error al cargar relaciones para paciente ${id}, intentando sin relaciones: ${error.message}`);
+        
+        const intake = await this.patientIntakeRepository.findOne({
+          where: { id },
+        });
+
+        if (!intake) {
+          throw new NotFoundException(
+            `Solicitud de paciente con ID "${id}" no encontrada.`,
+          );
+        }
+
+        return intake;
+      }
+      
+      throw error;
     }
-
-    return intake;
   }
 
   async findByTrial(trialId: string) {
@@ -97,6 +118,8 @@ export class PatientIntakesService {
    * Actualiza un paciente (por ejemplo, asignar a un ensayo)
    */
   async update(id: string, updateData: Partial<PatientIntake>) {
+    this.logger.log(`🔄 Iniciando actualización para paciente ${id} con datos: ${JSON.stringify(updateData)}`);
+    
     const intake = await this.findOne(id);
     
     // Guardar el estado anterior para comparar después
@@ -109,22 +132,44 @@ export class PatientIntakesService {
       // Verificar si el valor es válido en el enum
       if (Object.values(PatientIntakeStatus).some(val => val === statusValue)) {
         updateData.status = statusValue;
+        this.logger.log(`✅ Estado validado: ${updateData.status}`);
       } else {
+        this.logger.error(`❌ Valor de estado inválido: ${updateData.status}`);
         throw new Error(`Valor de estado inválido: ${updateData.status}`);
       }
     }
 
-    // Actualizar los campos proporcionados
-    Object.assign(intake, updateData);
+    // Filtrar solo campos válidos de la entidad PatientIntake
+    const validFields = Object.keys(updateData).filter(key => 
+      key in intake && updateData[key] !== undefined && updateData[key] !== null
+    );
+    
+    const filteredUpdateData: Partial<PatientIntake> = {};
+    validFields.forEach(key => {
+      filteredUpdateData[key] = updateData[key];
+    });
 
-    const savedIntake = await this.patientIntakeRepository.save(intake);
+    this.logger.log(`📋 Campos válidos para actualizar: ${validFields.join(', ')}`);
 
-    // Enviar correos si el estado cambió a VERIFIED o STUDY_ASSIGNED
-    if (updateData.status && updateData.status !== previousStatus) {
-      await this.handleStatusChangeNotifications(savedIntake, previousStatus);
+    // Actualizar solo los campos válidos
+    Object.assign(intake, filteredUpdateData);
+
+    try {
+      const savedIntake = await this.patientIntakeRepository.save(intake);
+      this.logger.log(`✅ Paciente ${id} actualizado exitosamente`);
+
+      // Enviar correos si el estado cambió a VERIFIED o STUDY_ASSIGNED
+      if (updateData.status && updateData.status !== previousStatus) {
+        this.logger.log(`📧 Estado cambiado de ${previousStatus} a ${updateData.status}, enviando notificaciones`);
+        await this.handleStatusChangeNotifications(savedIntake, previousStatus);
+      }
+
+      return savedIntake;
+    } catch (error) {
+      this.logger.error(`❌ Error al guardar paciente ${id}: ${error.message}`);
+      this.logger.error(`📋 Stack trace: ${error.stack}`);
+      throw new Error(`Error al actualizar el paciente: ${error.message}`);
     }
-
-    return savedIntake;
   }
 
   /**
