@@ -193,14 +193,18 @@ export class PatientIntakesService {
         );
         this.logger.log(`📧 Correo de verificación enviado a ${intake.email}`);
         
-      } else if (intake.status === PatientIntakeStatus.STUDY_ASSIGNED && intake.trial) {
-        // Enviar correo cuando se asigna a un estudio
-        await this.emailsService.sendStudyAssignedEmail(
-          intake.email,
-          patientName,
-          intake.trial.title
-        );
-        this.logger.log(`📧 Correo de asignación a estudio enviado a ${intake.email}`);
+      } else if (intake.status === PatientIntakeStatus.STUDY_ASSIGNED) {
+        // Enviar correo cuando se asigna a un estudio (solo si hay un estudio asignado)
+        if (intake.trial) {
+          await this.emailsService.sendStudyAssignedEmail(
+            intake.email,
+            patientName,
+            intake.trial.title
+          );
+          this.logger.log(`📧 Correo de asignación a estudio enviado a ${intake.email}`);
+        } else {
+          this.logger.warn(`⚠️  Paciente ${intake.email} marcado como STUDY_ASSIGNED pero sin estudio asignado`);
+        }
       }
     } catch (error) {
       this.logger.error(
