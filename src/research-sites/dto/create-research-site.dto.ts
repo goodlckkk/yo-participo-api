@@ -53,6 +53,11 @@ export class CreateResearchSiteDto {
   email?: string;
 
   @IsOptional()
+  @IsEmail({}, { message: 'El email de contacto debe ser válido' })
+  @MaxLength(255)
+  contactEmail?: string;
+
+  @IsOptional()
   @IsUrl({}, { message: 'El sitio web debe ser una URL válida' })
   @MaxLength(500)
   sitio_web?: string;

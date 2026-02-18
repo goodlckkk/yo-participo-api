@@ -4,12 +4,16 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
+    ManyToOne,
+    JoinColumn,
   } from 'typeorm';
+  import { ResearchSite } from '../../research-sites/entities/research-site.entity';
   
   export enum UserRole {
     PATIENT = 'PATIENT',
     DOCTOR = 'DOCTOR',
     ADMIN = 'ADMIN',
+    INSTITUTION = 'INSTITUTION',
   }
   
   @Entity('users')
@@ -44,4 +48,11 @@ import {
   
     @UpdateDateColumn()
     updated_at: Date;
+
+    @Column({ type: 'uuid', nullable: true })
+    institutionId: string | null;
+
+    @ManyToOne(() => ResearchSite, { nullable: true, onDelete: 'SET NULL' })
+    @JoinColumn({ name: 'institutionId' })
+    institution: ResearchSite | null;
   }
