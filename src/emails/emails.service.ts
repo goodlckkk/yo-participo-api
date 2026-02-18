@@ -353,4 +353,166 @@ export class EmailsService {
 </html>
     `;
   }
+
+  /**
+   * Envía correo cuando un paciente es verificado
+   * 
+   * @param patientEmail - Email del paciente
+   * @param patientName - Nombre completo del paciente
+   */
+  async sendPatientVerifiedEmail(patientEmail: string, patientName: string): Promise<void> {
+    const subject = '¡Tu perfil ha sido verificado! - YoParticipo';
+    const htmlBody = this.getPatientVerifiedEmailTemplate(patientName);
+
+    try {
+      await this.sendEmail(patientEmail, subject, htmlBody);
+      this.logger.log(`✅ Correo de verificación enviado a ${patientEmail}`);
+    } catch (error) {
+      this.logger.error(`❌ Error al enviar correo de verificación a ${patientEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Envía correo cuando un paciente es asignado a un estudio clínico
+   * 
+   * @param patientEmail - Email del paciente
+   * @param patientName - Nombre completo del paciente
+   * @param studyName - Nombre del estudio clínico
+   */
+  async sendStudyAssignedEmail(
+    patientEmail: string,
+    patientName: string,
+    studyName: string,
+  ): Promise<void> {
+    const subject = '¡Has sido asignado a un estudio clínico! - YoParticipo';
+    const htmlBody = this.getStudyAssignedEmailTemplate(patientName, studyName);
+
+    try {
+      await this.sendEmail(patientEmail, subject, htmlBody);
+      this.logger.log(`✅ Correo de asignación a estudio enviado a ${patientEmail}`);
+    } catch (error) {
+      this.logger.error(`❌ Error al enviar correo de asignación a ${patientEmail}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Plantilla HTML para correo de paciente verificado
+   */
+  private getPatientVerifiedEmailTemplate(patientName: string): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil Verificado - YoParticipo</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #04bcbc 0%, #346c84 100%); padding: 30px; text-align: center; color: white;">
+        <h1 style="margin: 0; font-size: 28px;">¡Tu perfil ha sido verificado!</h1>
+        <p style="margin: 15px 0 0; font-size: 16px; opacity: 0.9;">Estamos listos para encontrar las mejores oportunidades para ti</p>
+    </div>
+    
+    <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 style="color: #04bcbc; margin-top: 0;">Hola ${patientName},</h2>
+        
+        <p>Nos complace informarte que tu perfil ha sido <strong>verificado exitosamente</strong> en nuestra plataforma YoParticipo.</p>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #346c84; margin-top: 0;">✅ Verificación completada</h3>
+            <p>Tu información ha sido revisada y validada por nuestro equipo. Esto significa que:</p>
+            <ul style="margin: 15px 0;">
+                <li>Tu perfil está activo y visible para los estudios clínicos</li>
+                <li>Podrás recibir notificaciones de oportunidades compatibles</li>
+                <li>Estás un paso más cerca de participar en estudios que puedan ayudarte</li>
+            </ul>
+        </div>
+        
+        <p><strong>Próximos pasos:</strong></p>
+        <ol style="margin: 15px 0;">
+            <li>Nuestro sistema buscará estudios clínicos que coincidan con tu perfil</li>
+            <li>Recibirás notificaciones cuando encontremos oportunidades relevantes</li>
+            <li>Podrás revisar y aceptar participar en los estudios que te interesen</li>
+        </ol>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="font-size: 14px; color: #666;">
+                ¿Tienes preguntas? Contáctanos en 
+                <a href="mailto:contacto@yoparticipo.cl" style="color: #04bcbc;">contacto@yoparticipo.cl</a>
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+        <p style="margin: 0; font-size: 12px; color: #666;">
+            © 2024 YoParticipo. Todos los derechos reservados.
+        </p>
+    </div>
+</body>
+</html>
+    `;
+  }
+
+  /**
+   * Plantilla HTML para correo de asignación a estudio clínico
+   */
+  private getStudyAssignedEmailTemplate(patientName: string, studyName: string): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignación a Estudio - YoParticipo</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <div style="background: linear-gradient(135deg, #04bcbc 0%, #346c84 100%); padding: 30px; text-align: center; color: white;">
+        <h1 style="margin: 0; font-size: 28px;">¡Has sido asignado a un estudio!</h1>
+        <p style="margin: 15px 0 0; font-size: 16px; opacity: 0.9;">Una nueva oportunidad te espera</p>
+    </div>
+    
+    <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 style="color: #04bcbc; margin-top: 0;">Hola ${patientName},</h2>
+        
+        <p>¡Excelentes noticias! Has sido <strong>seleccionado para participar</strong> en el estudio clínico:</p>
+        
+        <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; margin: 20px 0; text-align: center;">
+            <h3 style="color: #346c84; margin-top: 0; font-size: 20px;">${studyName}</h3>
+            <p style="color: #666; margin: 10px 0 0;">Tu perfil coincide perfectamente con los requisitos de este estudio</p>
+        </div>
+        
+        <div style="background-color: #e8f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="color: #04bcbc; margin-top: 0;">📋 Próximos pasos:</h4>
+            <ol style="margin: 15px 0;">
+                <li><strong>Contacto del equipo:</strong> El coordinador del estudio se comunicará contigo dentro de las próximas 48 horas</li>
+                <li><strong>Información detallada:</strong> Recibirás toda la información sobre el estudio y los procedimientos</li>
+                <li><strong>Confirmación:</strong> Podrás hacer todas las preguntas que necesites antes de confirmar tu participación</li>
+            </ol>
+        </div>
+        
+        <p><strong>📞 Contacto importante:</strong></p>
+        <ul style="margin: 15px 0;">
+            <li>Mantén tu teléfono y email disponibles para recibir la llamada</li>
+            <li>Revisa tu bandeja de spam periódicamente por si nuestros correos llegan allí</li>
+            <li>Si no recibes noticias en 3 días, contáctanos a <a href="mailto:contacto@yoparticipo.cl" style="color: #04bcbc;">contacto@yoparticipo.cl</a></li>
+        </ul>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <p style="font-size: 16px; color: #04bcbc; font-weight: bold;">
+                ¡Felicidades por dar este importante paso!
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+        <p style="margin: 0; font-size: 12px; color: #666;">
+            © 2024 YoParticipo. Todos los derechos reservados.
+        </p>
+    </div>
+</body>
+</html>
+    `;
+  }
 }

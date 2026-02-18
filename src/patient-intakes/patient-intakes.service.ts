@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import {
   PatientIntake,
   PatientIntakeSource,
+  PatientIntakeStatus,
 } from './entities/patient-intake.entity';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { EmailsService } from '../emails/emails.service';
@@ -97,11 +98,32 @@ export class PatientIntakesService {
    */
   async update(id: string, updateData: Partial<PatientIntake>) {
     const intake = await this.findOne(id);
+    
+    // Guardar el estado anterior para comparar después
+    const previousStatus = intake.status;
+
+    // Validar y convertir el campo status si está presente
+    if (updateData.status && typeof updateData.status === 'string') {
+      // Convertir string a enum value
+      const statusValue = updateData.status as PatientIntakeStatus;
+      if (Object.values(PatientIntakeStatus).includes(statusValue)) {
+        updateData.status = statusValue;
+      } else {
+        throw new Error(`Valor de estado inválido: ${updateData.status}`);
+      }
+    }
 
     // Actualizar los campos proporcionados
     Object.assign(intake, updateData);
 
-    return this.patientIntakeRepository.save(intake);
+    const savedIntake = await this.patientIntakeRepository.save(intake);
+
+    // Enviar correos si el estado cambió a VERIFIED o STUDY_ASSIGNED
+    if (updateData.status && updateData.status !== previousStatus) {
+      await this.handleStatusChangeNotifications(savedIntake, previousStatus);
+    }
+
+    return savedIntake;
   }
 
   /**
@@ -149,6 +171,41 @@ export class PatientIntakesService {
     } catch (error) {
       console.error('❌ Error al eliminar permanentemente el paciente:', error);
       throw new Error(`Error al eliminar el paciente: ${error.message}`);
+    }
+  }
+
+  /**
+   * Maneja el envío de notificaciones por correo cuando cambia el estado del paciente
+   */
+  private async handleStatusChangeNotifications(
+    intake: PatientIntake,
+    previousStatus: PatientIntakeStatus,
+  ) {
+    const patientName = `${intake.nombres} ${intake.apellidos}`;
+    
+    try {
+      if (intake.status === PatientIntakeStatus.VERIFIED) {
+        // Enviar correo cuando el paciente es verificado
+        await this.emailsService.sendPatientVerifiedEmail(
+          intake.email,
+          patientName
+        );
+        this.logger.log(`📧 Correo de verificación enviado a ${intake.email}`);
+        
+      } else if (intake.status === PatientIntakeStatus.STUDY_ASSIGNED && intake.trial) {
+        // Enviar correo cuando se asigna a un estudio
+        await this.emailsService.sendStudyAssignedEmail(
+          intake.email,
+          patientName,
+          intake.trial.title
+        );
+        this.logger.log(`📧 Correo de asignación a estudio enviado a ${intake.email}`);
+      }
+    } catch (error) {
+      this.logger.error(
+        `❌ Error al enviar correo de notificación: ${error.message}`,
+      );
+      // No lanzar error para no interrumpir la actualización principal
     }
   }
 
