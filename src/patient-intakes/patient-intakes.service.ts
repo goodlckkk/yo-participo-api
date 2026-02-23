@@ -8,6 +8,7 @@ import {
 } from './entities/patient-intake.entity';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { EmailsService } from '../emails/emails.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
 export class PatientIntakesService {
@@ -17,6 +18,7 @@ export class PatientIntakesService {
     @InjectRepository(PatientIntake)
     private readonly patientIntakeRepository: Repository<PatientIntake>,
     private readonly emailsService: EmailsService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async create(createPatientIntakeDto: CreatePatientIntakeDto, user?: any) {
@@ -130,7 +132,7 @@ export class PatientIntakesService {
   /**
    * Actualiza un paciente (por ejemplo, asignar a un ensayo)
    */
-  async update(id: string, updateData: Partial<PatientIntake>) {
+  async update(id: string, updateData: Partial<PatientIntake>, user?: any) {
     this.logger.log(`🔄 Iniciando actualización para paciente ${id} con datos: ${JSON.stringify(updateData)}`);
     
     const intake = await this.findOne(id);
@@ -170,6 +172,30 @@ export class PatientIntakesService {
     try {
       const savedIntake = await this.patientIntakeRepository.save(intake);
       this.logger.log(`✅ Paciente ${id} actualizado exitosamente`);
+
+      // Registrar en audit log quién, cuándo y qué cambió
+      try {
+        const changes: Record<string, { before: any; after: any }> = {};
+        for (const key of validFields) {
+          if (intake[key] !== updateData[key]) {
+            changes[key] = { before: intake[key], after: filteredUpdateData[key] };
+          }
+        }
+        if (updateData.status && updateData.status !== previousStatus) {
+          changes['status'] = { before: previousStatus, after: updateData.status };
+        }
+        await this.auditLogsService.logChange(
+          'PatientIntake',
+          id,
+          'UPDATE',
+          changes,
+          user?.sub || user?.id,
+          user?.email,
+        );
+        this.logger.log(`📋 Audit log registrado para paciente ${id} por ${user?.email || 'sistema'}`);
+      } catch (auditError) {
+        this.logger.warn(`⚠️  No se pudo registrar audit log: ${auditError.message}`);
+      }
 
       // Enviar correos si el estado cambió a VERIFIED o STUDY_ASSIGNED
       if (updateData.status && updateData.status !== previousStatus) {

@@ -45,8 +45,9 @@ export class PatientIntakesController {
 
   @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateData: any) {
-    return this.patientIntakesService.update(id, updateData);
+  update(@Param('id') id: string, @Body() updateData: any, @Req() req?: any) {
+    const user = req?.user;
+    return this.patientIntakesService.update(id, updateData, user);
   }
 
   @UseGuards(AuthGuard('jwt'))

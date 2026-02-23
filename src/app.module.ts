@@ -26,6 +26,8 @@ import { SuccessStory } from './success-stories/entities/success-story.entity';
 import { EmailsModule } from './emails/emails.module';
 import { CommunesModule } from './communes/communes.module';
 import { Commune } from './communes/entities/commune.entity';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { AuditLog } from './audit-logs/entities/audit-log.entity';
 
 @Module({
   imports: [
@@ -55,7 +57,7 @@ import { Commune } from './communes/entities/commune.entity';
         username: config.get<string>('DB_USERNAME'),
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_DATABASE'),
-        entities: [Sponsor, User, Trial, PatientIntake, ResearchSite, Cie10Code, HeroSlide, SuccessStory, Commune],
+        entities: [Sponsor, User, Trial, PatientIntake, ResearchSite, Cie10Code, HeroSlide, SuccessStory, Commune, AuditLog],
         synchronize: false, // SIEMPRE false - usamos migraciones
         ssl: {
           rejectUnauthorized: false,
@@ -75,6 +77,7 @@ import { Commune } from './communes/entities/commune.entity';
     SuccessStoriesModule,
     EmailsModule,
     CommunesModule,
+    AuditLogsModule,
   ],
   controllers: [AppController],
   providers: [
