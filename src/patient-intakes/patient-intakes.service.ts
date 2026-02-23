@@ -174,7 +174,16 @@ export class PatientIntakesService {
       // Enviar correos si el estado cambió a VERIFIED o STUDY_ASSIGNED
       if (updateData.status && updateData.status !== previousStatus) {
         this.logger.log(`📧 Estado cambiado de ${previousStatus} a ${updateData.status}, enviando notificaciones`);
-        await this.handleStatusChangeNotifications(savedIntake, previousStatus);
+        
+        // Recargar el paciente con sus relaciones para enviar notificaciones correctamente
+        const intakeWithRelations = await this.patientIntakeRepository.findOne({
+          where: { id },
+          relations: ['trial', 'referralResearchSite'],
+        });
+        
+        if (intakeWithRelations) {
+          await this.handleStatusChangeNotifications(intakeWithRelations, previousStatus);
+        }
       }
 
       return savedIntake;
