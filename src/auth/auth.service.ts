@@ -37,7 +37,13 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales incorrectas (contraseña no coincide).');
     }
 
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      institutionId: user.institutionId || null,
+      institutionName: user.institution?.nombre || null,
+    };
     const expiresInSeconds = 15 * 60;
     const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
 

@@ -131,6 +131,10 @@ export class CreatePatientIntakeDto {
   aceptaPrivacidad: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  aceptaAlmacenamiento15Anos?: boolean;
+
+  @IsOptional()
   @IsUUID()
   trialId?: string;
 

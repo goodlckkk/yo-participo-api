@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:run": "npm run typeorm migration:run -- -d src/config/typeorm.config.ts",
+    "migration:run:prod": "npx typeorm migration:run -d dist/config/typeorm.config.prod.js",
     "migration:revert": "npm run typeorm migration:revert -- -d src/config/typeorm.config.ts",
     "migration:show": "npm run typeorm migration:show -- -d src/config/typeorm.config.ts",
     "import:cie10": "ts-node -r tsconfig-paths/register scripts/import-cie10.ts"
@@ -49,7 +50,8 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.27",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -59,10 +61,12 @@
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/supertest": "^6.0.2",
+    "@types/uuid": "^10.0.0",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",

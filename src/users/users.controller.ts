@@ -46,6 +46,12 @@ export class UsersController {
     return this.usersService.findOne(user.id);
   }
 
+  @Get('by-institution/:institutionId')
+  @Roles('ADMIN') // Solo administradores pueden consultar usuarios por institución
+  findByInstitution(@Param('institutionId') institutionId: string) {
+    return this.usersService.findByInstitutionId(institutionId);
+  }
+
   @Get(':id')
   @Roles('ADMIN') // Solo administradores pueden ver otros usuarios
   findOne(@Param('id') id: string) {

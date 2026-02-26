@@ -57,6 +57,7 @@ export class UsersService {
 
     return this.userRepository
       .createQueryBuilder('user')
+      .leftJoinAndSelect('user.institution', 'institution')
       .where('LOWER(user.email) = :email', { email: normalizedEmail })
       .getOne();
   }
@@ -100,6 +101,13 @@ export class UsersService {
   async remove(id: string) {
     const user = await this.findOne(id);
     await this.userRepository.remove(user);
+  }
+
+  async findByInstitutionId(institutionId: string) {
+    return this.userRepository.findOne({
+      where: { institutionId, role: UserRole.INSTITUTION },
+      select: ['id', 'fullName', 'email', 'role', 'institutionId'],
+    });
   }
 
   async findAdmins() {
