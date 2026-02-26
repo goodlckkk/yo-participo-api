@@ -44,12 +44,13 @@ export class AuthService {
       institutionId: user.institutionId || null,
       institutionName: user.institution?.nombre || null,
     };
-    const expiresInSeconds = 15 * 60;
-    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
+    const jwtExpiresIn = this.configService.get<string>('JWT_EXPIRES_IN') || '8h';
+    const expiresInMs = this.parseExpirationTime(jwtExpiresIn);
+    const expiresAt = new Date(Date.now() + expiresInMs).toISOString();
 
     return {
       access_token: this.jwtService.sign(payload),
-      expires_in: expiresInSeconds,
+      expires_in: Math.floor(expiresInMs / 1000),
       expires_at: expiresAt,
     };
   }
