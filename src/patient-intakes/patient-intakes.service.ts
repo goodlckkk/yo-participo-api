@@ -23,14 +23,29 @@ export class PatientIntakesService {
 
   async create(createPatientIntakeDto: CreatePatientIntakeDto, user?: any) {
     // Verificar si ya existe un paciente con el mismo email
-    const existingPatient = await this.patientIntakeRepository.findOne({
+    const existingByEmail = await this.patientIntakeRepository.findOne({
       where: { email: createPatientIntakeDto.email },
     });
 
-    if (existingPatient) {
+    if (existingByEmail) {
       throw new ConflictException(
         `Ya existe un paciente registrado con el email: ${createPatientIntakeDto.email}`,
       );
+    }
+
+    // Verificar si ya existe un paciente con el mismo RUT
+    if (createPatientIntakeDto.rut) {
+      const cleanRut = createPatientIntakeDto.rut.replace(/[.\-\s]/g, '').toUpperCase();
+      const existingByRut = await this.patientIntakeRepository
+        .createQueryBuilder('patient')
+        .where("UPPER(REPLACE(REPLACE(REPLACE(patient.rut, '.', ''), '-', ''), ' ', '')) = :cleanRut", { cleanRut })
+        .getOne();
+
+      if (existingByRut) {
+        throw new ConflictException(
+          `Ya existe un paciente registrado con el RUT: ${createPatientIntakeDto.rut}`,
+        );
+      }
     }
 
     // Si el usuario es INSTITUTION, forzar el ID de la institución

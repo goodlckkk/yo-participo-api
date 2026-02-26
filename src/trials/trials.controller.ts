@@ -38,7 +38,7 @@ export class TrialsController {
       await this.emailsService.sendTrialRequestEmail(
         'admin@yoparticipo.cl', // Email del admin (debería venir de configuración)
         {
-          institutionName: user.institution?.nombre || 'Institución',
+          institutionName: user.institutionName || user.institution?.nombre || 'Institución',
           contactEmail: user.email,
           trialTitle: createTrialRequestDto.title,
           trialDescription: createTrialRequestDto.description,

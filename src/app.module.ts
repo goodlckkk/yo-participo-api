@@ -28,6 +28,7 @@ import { CommunesModule } from './communes/communes.module';
 import { Commune } from './communes/entities/commune.entity';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { AuditLog } from './audit-logs/entities/audit-log.entity';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { AuditLog } from './audit-logs/entities/audit-log.entity';
     EmailsModule,
     CommunesModule,
     AuditLogsModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [

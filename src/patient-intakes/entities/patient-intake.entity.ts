@@ -165,11 +165,26 @@ export class PatientIntake {
   @Column({ type: 'jsonb', nullable: true })
   medicamentosEstructurados: string[] | null;
 
+  /**
+   * URL del documento de consentimiento informado firmado (escaneado/foto)
+   * Se sube desde el dashboard admin cuando el paciente firma presencialmente
+   * Almacenado en S3
+   */
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  consentDocumentUrl: string | null;
+
   @Column({ default: false })
   aceptaTerminos: boolean;
 
   @Column({ default: false })
   aceptaPrivacidad: boolean;
+
+  /**
+   * Consentimiento para almacenamiento de datos por 15 años
+   * Requerido por normativa de estudios clínicos
+   */
+  @Column({ default: false })
+  aceptaAlmacenamiento15Anos: boolean;
 
   @Column({
     type: 'enum',

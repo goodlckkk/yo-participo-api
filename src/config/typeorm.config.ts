@@ -20,6 +20,7 @@ export default new DataSource({
   entities: ['src/**/*.entity{.ts,.js}'],
   migrations: ['src/migrations/*{.ts,.js}'],
   synchronize: false, // NUNCA true en producción
+  migrationsTransactionMode: 'each',
   logging: process.env.NODE_ENV !== 'production',
   ssl:
     process.env.NODE_ENV === 'production'
