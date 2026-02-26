@@ -22,7 +22,7 @@ export class TrialsController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('ADMIN', 'DOCTOR')
+  @Roles('ADMIN', 'MODERATOR', 'DOCTOR')
   create(@Body() createTrialDto: CreateTrialDto) {
     return this.trialsService.create(createTrialDto);
   }
@@ -163,7 +163,7 @@ export class TrialsController {
 
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('ADMIN', 'DOCTOR')
+  @Roles('ADMIN', 'MODERATOR', 'DOCTOR')
   update(@Param('id') id: string, @Body() updateTrialDto: UpdateTrialDto) {
     return this.trialsService.update(id, updateTrialDto);
   }
