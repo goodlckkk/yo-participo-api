@@ -36,7 +36,7 @@ export class TrialsController {
     try {
       // Enviar email al administrador con la solicitud
       await this.emailsService.sendTrialRequestEmail(
-        'admin@yoparticipo.cl', // Email del admin (debería venir de configuración)
+        'admin@yoparticipo.cl',
         {
           institutionName: user.institutionName || user.institution?.nombre || 'Institución',
           contactEmail: user.email,
@@ -57,6 +57,60 @@ export class TrialsController {
         success: false,
         message: 'Error al procesar la solicitud. Por favor, intente nuevamente.',
         error: error.message
+      };
+    }
+  }
+
+  /**
+   * Solicitud completa de estudio clínico por parte de una institución.
+   * Crea el trial con status PREPARATION y notifica al administrador.
+   * El admin puede luego revisar y cambiar el estado a RECRUITING.
+   */
+  @Post('request-full')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('INSTITUTION')
+  async requestTrialFull(@Body() createTrialDto: CreateTrialDto, @Req() req: any) {
+    const user = req.user;
+
+    try {
+      // Forzar status PREPARATION y asignar la institución del usuario
+      const trialData = {
+        ...createTrialDto,
+        status: TrialStatus.PREPARATION,
+        research_site_id: createTrialDto.research_site_id || user.institutionId,
+      };
+
+      // Crear el trial en la base de datos
+      const trial = await this.trialsService.create(trialData);
+
+      // Notificar al administrador por email
+      try {
+        await this.emailsService.sendTrialRequestEmail(
+          'admin@yoparticipo.cl',
+          {
+            institutionName: user.institutionName || 'Institución',
+            contactEmail: user.email,
+            trialTitle: createTrialDto.title,
+            trialDescription: createTrialDto.public_description,
+            additionalNotes: `Solicitud completa creada automáticamente con estado "En Preparación". Revise el estudio en el dashboard y cambie el estado a "Reclutamiento Activo" cuando esté listo.`,
+            requestDate: new Date().toLocaleDateString('es-CL'),
+          },
+        );
+      } catch (emailError) {
+        // No fallar si el email no se envía - el trial ya fue creado
+        console.error('Error al enviar email de notificación:', emailError);
+      }
+
+      return {
+        success: true,
+        message: 'Solicitud de estudio creada exitosamente. El administrador será notificado para su revisión.',
+        trial,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Error al procesar la solicitud. Por favor, intente nuevamente.',
+        error: error.message,
       };
     }
   }
