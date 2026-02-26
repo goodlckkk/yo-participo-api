@@ -116,6 +116,14 @@ export class TrialsService {
   async update(id: string, updateTrialDto: UpdateTrialDto) {
     const { sponsor_id, research_site_id, ...trialData } = updateTrialDto;
 
+    // Si se está cambiando el estado, resetear la solicitud de cambio de fase
+    const existingTrial = await this.trialRepository.findOne({ where: { id } });
+    if (!existingTrial) {
+      throw new NotFoundException(`Ensayo clínico con ID "${id}" no encontrado.`);
+    }
+
+    const statusChanged = trialData.status && trialData.status !== existingTrial.status;
+
     const trial = await this.trialRepository.preload({
       id,
       ...trialData,
@@ -123,11 +131,30 @@ export class TrialsService {
       ...(sponsor_id && { sponsor: { id: sponsor_id } }),
       // Solo actualizar research site si se proporciona research_site_id
       ...(research_site_id && { researchSite: { id: research_site_id } }),
+      // Resetear solicitud de cambio de fase si el admin cambió el estado
+      ...(statusChanged && {
+        phaseChangeRequested: false,
+        phaseChangeRequestedAt: null,
+        phaseChangeRequestedBy: null,
+      }),
     });
 
+    return this.trialRepository.save(trial);
+  }
+
+  /**
+   * Solicitar cambio de fase por parte de una institución.
+   * No cambia el estado directamente, solo marca la solicitud para que el admin la revise.
+   */
+  async requestPhaseChange(id: string, requestedBy: string) {
+    const trial = await this.trialRepository.findOne({ where: { id } });
     if (!trial) {
       throw new NotFoundException(`Ensayo clínico con ID "${id}" no encontrado.`);
     }
+
+    trial.phaseChangeRequested = true;
+    trial.phaseChangeRequestedAt = new Date();
+    trial.phaseChangeRequestedBy = requestedBy;
 
     return this.trialRepository.save(trial);
   }
