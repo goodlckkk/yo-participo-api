@@ -12,13 +12,15 @@ import {
   import { InclusionCriteria } from '../interfaces/inclusion-criteria.interface';
   
   /**
-   * Estados de un estudio clínico según feedback:
-   * - PREPARATION: En preparación (planificación)
+   * Estados de un estudio clínico:
+   * - PENDING_APPROVAL: Solicitud en revisión (creado por institución, pendiente de aprobación)
+   * - PREPARATION: En preparación (planificación interna)
    * - RECRUITING: Reclutamiento activo (buscando participantes)
    * - FOLLOW_UP: En seguimiento (estudio en curso con pacientes)
    * - CLOSED: Cerrado (estudio finalizado)
    */
   export enum TrialStatus {
+    PENDING_APPROVAL = 'PENDING_APPROVAL',
     PREPARATION = 'PREPARATION',
     RECRUITING = 'RECRUITING',
     FOLLOW_UP = 'FOLLOW_UP',
@@ -87,6 +89,18 @@ import {
     @JoinColumn({ name: 'research_site_id' })
     researchSite: ResearchSite | null;
   
+    /** Indica si la institución ha solicitado un cambio de fase */
+    @Column({ type: 'boolean', default: false })
+    phaseChangeRequested: boolean;
+
+    /** Fecha en que se solicitó el cambio de fase */
+    @Column({ type: 'timestamp', nullable: true })
+    phaseChangeRequestedAt: Date | null;
+
+    /** Nombre/email de quien solicitó el cambio de fase */
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    phaseChangeRequestedBy: string | null;
+
     @CreateDateColumn()
     created_at: Date;
   

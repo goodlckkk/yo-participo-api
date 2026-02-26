@@ -73,10 +73,10 @@ export class TrialsController {
     const user = req.user;
 
     try {
-      // Forzar status PREPARATION y asignar la institución del usuario
+      // Forzar status PENDING_APPROVAL y asignar la institución del usuario
       const trialData = {
         ...createTrialDto,
-        status: TrialStatus.PREPARATION,
+        status: TrialStatus.PENDING_APPROVAL,
         research_site_id: createTrialDto.research_site_id || user.institutionId,
       };
 
@@ -110,6 +110,33 @@ export class TrialsController {
       return {
         success: false,
         message: 'Error al procesar la solicitud. Por favor, intente nuevamente.',
+        error: error.message,
+      };
+    }
+  }
+
+  /**
+   * Solicitar cambio de fase por parte de una institución.
+   * No cambia el estado, solo marca la solicitud para que el admin la revise.
+   */
+  @Post(':id/request-phase-change')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('INSTITUTION')
+  async requestPhaseChange(@Param('id') id: string, @Req() req: any) {
+    const user = req.user;
+    const requestedBy = user.institutionName || user.email || 'Institución';
+
+    try {
+      const trial = await this.trialsService.requestPhaseChange(id, requestedBy);
+      return {
+        success: true,
+        message: 'Solicitud de cambio de fase enviada. El administrador será notificado.',
+        trial,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Error al procesar la solicitud.',
         error: error.message,
       };
     }
