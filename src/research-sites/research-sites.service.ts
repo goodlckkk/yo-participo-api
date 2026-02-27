@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
@@ -11,6 +12,7 @@ import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity
 import { CreateResearchSiteDto } from './dto/create-research-site.dto';
 import { UpdateResearchSiteDto } from './dto/update-research-site.dto';
 import { CommunesService } from '../communes/communes.service';
+import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 /**
  * Servicio para gestionar instituciones/sitios de investigación
@@ -22,6 +24,8 @@ import { CommunesService } from '../communes/communes.service';
  */
 @Injectable()
 export class ResearchSitesService {
+  private readonly logger = new Logger(ResearchSitesService.name);
+
   constructor(
     @InjectRepository(ResearchSite)
     private readonly researchSiteRepository: Repository<ResearchSite>,
@@ -30,6 +34,7 @@ export class ResearchSitesService {
     @InjectRepository(PatientIntake)
     private readonly patientIntakeRepository: Repository<PatientIntake>,
     private readonly communesService: CommunesService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   /**
@@ -38,6 +43,7 @@ export class ResearchSitesService {
    */
   async create(
     createResearchSiteDto: CreateResearchSiteDto,
+    user?: any,
   ): Promise<ResearchSite> {
     // Verificar si ya existe una institución con ese nombre
     const existente = await this.researchSiteRepository.findOne({
@@ -53,7 +59,24 @@ export class ResearchSitesService {
     const researchSite = this.researchSiteRepository.create(
       createResearchSiteDto,
     );
-    return this.researchSiteRepository.save(researchSite);
+    const saved = await this.researchSiteRepository.save(researchSite);
+
+    // Registrar en audit log
+    try {
+      await this.auditLogsService.logChange(
+        'ResearchSite',
+        saved.id,
+        'CREATE',
+        { nombre: saved.nombre, region: saved.region, comuna: saved.comuna },
+        user?.sub || user?.id,
+        user?.email,
+      );
+      this.logger.log(`📋 Audit log registrado para institución ${saved.id} (CREATE)`);
+    } catch (auditError) {
+      this.logger.warn(`⚠️ No se pudo registrar audit log: ${auditError.message}`);
+    }
+
+    return saved;
   }
 
   /**
@@ -160,6 +183,7 @@ export class ResearchSitesService {
   async update(
     id: string,
     updateResearchSiteDto: UpdateResearchSiteDto,
+    user?: any,
   ): Promise<ResearchSite> {
     const researchSite = await this.findOne(id);
 
@@ -179,8 +203,43 @@ export class ResearchSitesService {
       }
     }
 
+    // Guardar valores anteriores para audit log
+    const previousValues: Record<string, any> = {};
+    const fieldsToTrack = ['nombre', 'region', 'comuna', 'direccion', 'ciudad', 'telefono', 'email', 'sitio_web', 'descripcion'];
+    for (const field of fieldsToTrack) {
+      if (updateResearchSiteDto[field] !== undefined) {
+        previousValues[field] = researchSite[field];
+      }
+    }
+
     Object.assign(researchSite, updateResearchSiteDto);
-    return this.researchSiteRepository.save(researchSite);
+    const saved = await this.researchSiteRepository.save(researchSite);
+
+    // Registrar en audit log
+    try {
+      const changes: Record<string, { before: any; after: any }> = {};
+      for (const field of fieldsToTrack) {
+        if (updateResearchSiteDto[field] !== undefined && previousValues[field] !== updateResearchSiteDto[field]) {
+          changes[field] = { before: previousValues[field], after: updateResearchSiteDto[field] };
+        }
+      }
+
+      if (Object.keys(changes).length > 0) {
+        await this.auditLogsService.logChange(
+          'ResearchSite',
+          id,
+          'UPDATE',
+          changes,
+          user?.sub || user?.id,
+          user?.email,
+        );
+        this.logger.log(`📋 Audit log registrado para institución ${id} (UPDATE) por ${user?.email || 'sistema'}`);
+      }
+    } catch (auditError) {
+      this.logger.warn(`⚠️ No se pudo registrar audit log: ${auditError.message}`);
+    }
+
+    return saved;
   }
 
   /**

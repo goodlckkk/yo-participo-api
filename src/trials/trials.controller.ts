@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, Query, UseGuards, Req, Header } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TrialsService } from './trials.service';
 import { TrialMatchingService } from './trial-matching.service';
@@ -23,8 +23,8 @@ export class TrialsController {
   @Post()
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN', 'MODERATOR', 'DOCTOR')
-  create(@Body() createTrialDto: CreateTrialDto) {
-    return this.trialsService.create(createTrialDto);
+  create(@Body() createTrialDto: CreateTrialDto, @Req() req: any) {
+    return this.trialsService.create(createTrialDto, req.user);
   }
 
   @Post('request')
@@ -143,6 +143,7 @@ export class TrialsController {
   }
 
   @Get()
+  @Header('Cache-Control', 'public, max-age=120, s-maxage=120')
   // Endpoint público - no requiere autenticación para ver ensayos
   findAll(@Query() query: PaginationDto & { status?: TrialStatus }) {
     const { page, limit, status } = query;
@@ -156,6 +157,7 @@ export class TrialsController {
   }
 
   @Get(':id')
+  @Header('Cache-Control', 'public, max-age=120, s-maxage=120')
   // Endpoint público - no requiere autenticación para ver detalle
   findOne(@Param('id') id: string) {
     return this.trialsService.findOne(id);
@@ -164,8 +166,8 @@ export class TrialsController {
   @Patch(':id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN', 'MODERATOR', 'DOCTOR')
-  update(@Param('id') id: string, @Body() updateTrialDto: UpdateTrialDto) {
-    return this.trialsService.update(id, updateTrialDto);
+  update(@Param('id') id: string, @Body() updateTrialDto: UpdateTrialDto, @Req() req: any) {
+    return this.trialsService.update(id, updateTrialDto, req.user);
   }
 
   @Delete(':id')

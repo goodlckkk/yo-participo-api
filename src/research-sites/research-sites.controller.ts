@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ResearchSitesService } from './research-sites.service';
@@ -37,8 +38,8 @@ export class ResearchSitesController {
    * POST /research-sites
    */
   @Post()
-  create(@Body() createResearchSiteDto: CreateResearchSiteDto) {
-    return this.researchSitesService.create(createResearchSiteDto);
+  create(@Body() createResearchSiteDto: CreateResearchSiteDto, @Req() req: any) {
+    return this.researchSitesService.create(createResearchSiteDto, req.user);
   }
 
   /**
@@ -76,8 +77,9 @@ export class ResearchSitesController {
   update(
     @Param('id') id: string,
     @Body() updateResearchSiteDto: UpdateResearchSiteDto,
+    @Req() req: any,
   ) {
-    return this.researchSitesService.update(id, updateResearchSiteDto);
+    return this.researchSitesService.update(id, updateResearchSiteDto, req.user);
   }
 
   /**

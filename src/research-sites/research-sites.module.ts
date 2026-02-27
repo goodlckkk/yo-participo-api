@@ -6,6 +6,7 @@ import { ResearchSite } from './entities/research-site.entity';
 import { Trial } from '../trials/entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
 import { CommunesModule } from '../communes/communes.module';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 /**
  * Módulo para gestionar instituciones/sitios de investigación
@@ -20,6 +21,7 @@ import { CommunesModule } from '../communes/communes.module';
   imports: [
     TypeOrmModule.forFeature([ResearchSite, Trial, PatientIntake]),
     CommunesModule, // Para usar CommunesService
+    AuditLogsModule, // Para registrar historial de cambios
   ],
   controllers: [ResearchSitesController],
   providers: [ResearchSitesService],
