@@ -13,12 +13,14 @@ import {
 import { PatientIntakesService } from './patient-intakes.service';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { OptionalAuthGuard } from '../auth/guards/optional-auth.guard';
 
 @Controller('patient-intakes')
 export class PatientIntakesController {
   constructor(private readonly patientIntakesService: PatientIntakesService) {}
 
   @Post()
+  @UseGuards(OptionalAuthGuard)
   create(@Body() createPatientIntakeDto: CreatePatientIntakeDto, @Req() req?: any) {
     const user = req?.user;
     return this.patientIntakesService.create(createPatientIntakeDto, user);
