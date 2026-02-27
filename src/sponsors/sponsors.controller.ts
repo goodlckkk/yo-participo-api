@@ -1,15 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, ParseUUIDPipe, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, ParseUUIDPipe, Query, UseGuards, Req } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { SponsorsService } from './sponsors.service';
 import { CreateSponsorDto } from './dto/create-sponsor.dto';
 import { UpdateSponsorDto } from './dto/update-sponsor.dto';
 
 @Controller('sponsors')
+@UseGuards(AuthGuard('jwt'))
 export class SponsorsController {
   constructor(private readonly sponsorsService: SponsorsService) {}
 
   @Post()
-  create(@Body() createSponsorDto: CreateSponsorDto) {
-    return this.sponsorsService.create(createSponsorDto);
+  create(@Body() createSponsorDto: CreateSponsorDto, @Req() req: any) {
+    return this.sponsorsService.create(createSponsorDto, req.user);
   }
 
   @Get('search')
@@ -33,8 +35,8 @@ export class SponsorsController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateSponsorDto: UpdateSponsorDto) {
-    return this.sponsorsService.update(id, updateSponsorDto);
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() updateSponsorDto: UpdateSponsorDto, @Req() req: any) {
+    return this.sponsorsService.update(id, updateSponsorDto, req.user);
   }
 
   

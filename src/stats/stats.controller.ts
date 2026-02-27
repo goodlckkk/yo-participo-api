@@ -10,7 +10,7 @@
  * - Ensayos más populares
  */
 
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Header, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { StatsService } from './stats.service';
 
@@ -31,6 +31,7 @@ export class StatsController {
   }
 
   @Get('public')
+  @Header('Cache-Control', 'public, max-age=300, s-maxage=300')
   async getPublicStats() {
     return this.statsService.getPublicStats();
   }
