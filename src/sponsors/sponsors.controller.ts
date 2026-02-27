@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, ParseUUIDPipe, Query, UseGuards, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { SponsorsService } from './sponsors.service';
 import { CreateSponsorDto } from './dto/create-sponsor.dto';
 import { UpdateSponsorDto } from './dto/update-sponsor.dto';
@@ -29,6 +31,8 @@ export class SponsorsController {
     return this.sponsorsService.findOne(id);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.sponsorsService.remove(id);
