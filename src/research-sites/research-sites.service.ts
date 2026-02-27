@@ -9,6 +9,7 @@ import { Repository, ILike } from 'typeorm';
 import { ResearchSite } from './entities/research-site.entity';
 import { Trial } from '../trials/entities/trial.entity';
 import { PatientIntake } from '../patient-intakes/entities/patient-intake.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 import { CreateResearchSiteDto } from './dto/create-research-site.dto';
 import { UpdateResearchSiteDto } from './dto/update-research-site.dto';
 import { CommunesService } from '../communes/communes.service';
@@ -33,6 +34,8 @@ export class ResearchSitesService {
     private readonly trialRepository: Repository<Trial>,
     @InjectRepository(PatientIntake)
     private readonly patientIntakeRepository: Repository<PatientIntake>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly communesService: CommunesService,
     private readonly auditLogsService: AuditLogsService,
   ) {}
@@ -282,7 +285,22 @@ export class ResearchSitesService {
         `📝 Pacientes desvinculados: ${patientsUpdated.affected || 0}`,
       );
 
-      // 3. Ahora podemos eliminar la institución de forma segura
+      // 3. Eliminar usuarios con role INSTITUTION vinculados a esta institución
+      const usersDeleted = await this.userRepository
+        .createQueryBuilder()
+        .delete()
+        .from(User)
+        .where('"institutionId" = :siteId AND role = :role', {
+          siteId: id,
+          role: UserRole.INSTITUTION,
+        })
+        .execute();
+
+      console.log(
+        `👤 Usuarios de institución eliminados: ${usersDeleted.affected || 0}`,
+      );
+
+      // 4. Ahora podemos eliminar la institución de forma segura
       await this.researchSiteRepository.delete(id);
 
       console.log(
