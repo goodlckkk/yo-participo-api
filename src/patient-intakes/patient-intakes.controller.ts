@@ -14,6 +14,8 @@ import { PatientIntakesService } from './patient-intakes.service';
 import { CreatePatientIntakeDto } from './dto/create-patient-intake.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { OptionalAuthGuard } from '../auth/guards/optional-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('patient-intakes')
 export class PatientIntakesController {
@@ -52,7 +54,8 @@ export class PatientIntakesController {
     return this.patientIntakesService.update(id, updateData, user);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN', 'MODERATOR', 'SUPPORT')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.patientIntakesService.remove(id);
@@ -62,7 +65,8 @@ export class PatientIntakesController {
    * Elimina PERMANENTEMENTE un paciente de la base de datos
    * ⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE
    */
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN')
   @Delete(':id/permanent')
   hardDelete(@Param('id') id: string) {
     return this.patientIntakesService.hardDelete(id);
@@ -90,7 +94,8 @@ export class PatientIntakesController {
    * Elimina PERMANENTEMENTE todos los pacientes marcados como DISCARDED
    * ⚠️ ADVERTENCIA: Esta acción es IRREVERSIBLE
    */
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles('ADMIN')
   @Delete('discarded/purge')
   hardDeleteAllDiscarded() {
     return this.patientIntakesService.hardDeleteAllDiscarded();

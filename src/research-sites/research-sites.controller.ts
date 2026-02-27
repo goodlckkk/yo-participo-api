@@ -11,6 +11,8 @@ import {
   Req,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { ResearchSitesService } from './research-sites.service';
 import { CreateResearchSiteDto } from './dto/create-research-site.dto';
 import { UpdateResearchSiteDto } from './dto/update-research-site.dto';
@@ -86,6 +88,8 @@ export class ResearchSitesController {
    * Eliminar (desactivar) una institución
    * DELETE /research-sites/:id
    */
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.researchSitesService.remove(id);
